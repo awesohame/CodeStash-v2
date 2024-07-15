@@ -24,6 +24,7 @@ import { signInWithEmailAndPassword } from "firebase/auth"
 import GoogleSignIn from './GoogleSignIn'
 import { get } from 'http'
 import { doc, getDoc } from 'firebase/firestore'
+import toast from 'react-hot-toast'
 
 const loginSchema = z.object({
     email: z.string().email("Please enter a valid email."),
@@ -55,6 +56,8 @@ const Signin = ({
             router.push(`/${userDoc.data()?.username}`);
         } catch (error) {
             console.error(error)
+            toast.error("Invalid credentials")
+            form.setValue('password', '')
         }
     }
 

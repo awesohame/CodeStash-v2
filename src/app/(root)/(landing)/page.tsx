@@ -1,8 +1,8 @@
 import React from 'react'
 import { Button } from '@/components/ui/button'
 
-import Home from '@/components/Home'
-import Auth from '@/components/Auth'
+import Home from '@/components/auth/Home'
+import Auth from '@/components/auth/Auth'
 
 export default function Landing() {
     return (

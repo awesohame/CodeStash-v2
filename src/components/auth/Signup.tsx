@@ -22,6 +22,8 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, getDocs, query, collection, where } from 'firebase/firestore';
 
 import GoogleSignIn from './GoogleSignIn';
+import toast from 'react-hot-toast';
+import { cn } from '@/lib/utils';
 
 const registerSchema = z.object({
     firstName: z.string().min(1, "First name is required").max(10, "Name shouldn't exceed 10 characters"),
@@ -75,6 +77,8 @@ const Signup = ({
             router.push(`/${values.username.toLowerCase()}`);
         } catch (error) {
             console.error(error);
+            toast.error("Email is already in use");
+            form.setValue('password', '');
         }
     }
 
@@ -167,7 +171,10 @@ const Signup = ({
                             </FormItem>
                         )}
                     />
-                    <Button type='submit' className="w-full bg-dark-1 hover:bg-dark-0">Sign Up</Button>
+                    <Button type='submit'
+                        className="w-full bg-dark-1 hover:bg-dark-0 disabled:bg-opacity-80"
+                        disabled={usernameAvailable === false || !!form.formState.errors.password}
+                    >Sign Up</Button>
                 </form>
             </Form>
 
