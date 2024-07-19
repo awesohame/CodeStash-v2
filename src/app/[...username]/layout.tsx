@@ -1,6 +1,6 @@
 import React, { ReactNode } from "react";
 import { Metadata } from "next";
-import Header from "@/components/Header";
+import Sidebar from "@/components/sidebar/Sidebar";
 
 export const metadata: Metadata = {
     title: "CodeStash",
@@ -9,9 +9,12 @@ export const metadata: Metadata = {
 
 const DashboardLayout = ({ children }: Readonly<{ children: ReactNode }>) => {
     return (
-        <>
-            <Header />
-        </>
+        <main className="text-light-1 w-full h-full min-h-screen flex">
+            <Sidebar />
+            <div className="w-full h-full min-h-screen border-2">
+                {children}
+            </div>
+        </main>
     )
 }
 

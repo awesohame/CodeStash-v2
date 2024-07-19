@@ -37,7 +37,8 @@ const config = {
           1: "#D5CAD6",
           2: "#BBB5BD",
           3: '#66635B',
-          4: "#050517"
+          4: '#4A4742',
+          5: "#050517"
         },
 
         border: "hsl(var(--border))",

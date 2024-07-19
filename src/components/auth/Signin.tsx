@@ -22,7 +22,6 @@ import { auth, db } from '@/config/firebase'
 import { signInWithEmailAndPassword } from "firebase/auth"
 
 import GoogleSignIn from './GoogleSignIn'
-import { get } from 'http'
 import { doc, getDoc } from 'firebase/firestore'
 import toast from 'react-hot-toast'
 
