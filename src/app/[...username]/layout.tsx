@@ -11,7 +11,7 @@ const DashboardLayout = ({ children }: Readonly<{ children: ReactNode }>) => {
     return (
         <main className="text-light-1 w-full h-full min-h-screen flex">
             <Sidebar />
-            <div className="w-full h-full min-h-screen border-2">
+            <div className="w-full h-full min-h-screen bg-dark-3 flex flex-col">
                 {children}
             </div>
         </main>

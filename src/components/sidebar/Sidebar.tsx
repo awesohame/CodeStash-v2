@@ -11,29 +11,58 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
+
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
 
-
 import Link from 'next/link';
 import SidebarIcon from './SidebarIcon';
+import QuickLinkForm from '../QuickLinkForm';
 
+import { db, auth } from '@/config/firebase';
+import { getDoc, doc } from 'firebase/firestore';
 
 const Sidebar = () => {
-    const [quickLinks, setQuickLinks] = useState<{ label: string, url: string }[]>([])
+    const [quickLinks, setQuickLinks] = useState<{ title: string, url: string }[]>([])
 
     useEffect(() => {
         const fetchQuickLinks = async () => {
             // fetch quick links
 
-            setQuickLinks([
-                { label: 'Google', url: 'https://google.com' },
-                { label: 'Facebook', url: 'https://facebook.com' },
-                { label: 'Twitter', url: 'https://twitter.com' },
-            ])
+            // setQuickLinks([
+            //     { title: 'Google', url: 'https://google.com' },
+            //     { title: 'Facebook', url: 'https://facebook.com' },
+            //     { title: 'Twitter', url: 'https://twitter.com' },
+            // ])
+
+            const user = auth.currentUser;
+            if (!user) {
+                console.error('User not logged in');
+                return;
+            }
+            const email = user.email;
+            const quickLinkRef = doc(db, 'quickLinks', email as string);
+            const quickLinkDoc = await getDoc(quickLinkRef);
+            if (quickLinkDoc.exists()) {
+                const quickLinksData = quickLinkDoc.data().quickLinks ?? [];
+                console.log(quickLinksData);
+                setQuickLinks(quickLinksData);
+            }
+            else {
+                console.log('No quicklinks found');
+            }
         }
         fetchQuickLinks()
     }, [])
@@ -47,18 +76,35 @@ const Sidebar = () => {
                 <div className='text-xl text-light-2 flex justify-between items-center'>
                     <span>Quick Links</span>
 
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger>
-                                <div className='rounded-full hover:bg-dark-2 text-light-4 hover:text-light-1 p-2 h-auto bg-transparent cursor-pointer'>
-                                    <FaPlus className='text-xl' />
-                                </div>
-                            </TooltipTrigger>
-                            <TooltipContent className='bg-light-1 text-dark-0 border-none'>
-                                <span>Add a Quick Link</span>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
+                    <Dialog>
+                        <DialogTrigger>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <div className='rounded-full hover:bg-dark-2 text-light-4 hover:text-light-1 p-2 h-auto bg-transparent cursor-pointer'>
+                                            <FaPlus className='text-xl' />
+                                        </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent className='bg-light-1 text-dark-0 border-none'>
+                                        <span>Add a Quick Link</span>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </DialogTrigger>
+                        <DialogContent
+                            className='bg-dark-4 border-none rounded-xl'
+                        >
+                            <DialogHeader>
+                                <DialogTitle className='text-dark-1 text-3xl'>Create Quicklink</DialogTitle>
+                                <DialogDescription>
+                                    <QuickLinkForm />
+                                </DialogDescription>
+                            </DialogHeader>
+                        </DialogContent>
+                    </Dialog>
+
+
+
                 </div>
 
                 <div className='flex flex-col gap-2 mt-2'>
@@ -66,7 +112,7 @@ const Sidebar = () => {
                         <Link href={quicklink.url} key={index} className='py-1 px-2 flex gap-2 text-light-2 hover:text-light-3 hover:underline'>
                             <SidebarIcon link={quicklink.url} className='w-6 h-6' />
                             <span>
-                                {quicklink.label}
+                                {quicklink.title}
                             </span>
                         </Link>
                     ))}
