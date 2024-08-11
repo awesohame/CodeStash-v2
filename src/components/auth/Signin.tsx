@@ -25,6 +25,8 @@ import GoogleSignIn from './GoogleSignIn'
 import { doc, getDoc } from 'firebase/firestore'
 import toast from 'react-hot-toast'
 
+import { useUser } from '@/context/UserContext'
+
 const loginSchema = z.object({
     email: z.string().email("Please enter a valid email."),
     password: z.string().min(6, "Password must be at least 6 characters long").max(100, "Password must be less than 100 characters")
@@ -36,6 +38,7 @@ const Signin = ({
     setShowUsernameDialog: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
     const router = useRouter();
+    const { user, setUser } = useUser();
 
     const form = useForm<z.infer<typeof loginSchema>>({
         resolver: zodResolver(loginSchema),
@@ -49,9 +52,14 @@ const Signin = ({
             await signInWithEmailAndPassword(auth, values.email, values.password);
             const email = values.email ?? '';
             form.reset();
-            console.log('User signed in with email and password successfully');
+            // console.log('User signed in with email and password successfully');
             const userRef = doc(db, 'users', email);
             const userDoc = await getDoc(userRef);
+            const userData = userDoc.data();
+            setUser({
+                username: userData?.username,
+                firstName: userData?.firstName
+            });
             router.push(`/${userDoc.data()?.username}`);
         } catch (error) {
             console.error(error)

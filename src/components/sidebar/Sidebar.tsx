@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { FaPlus } from "react-icons/fa6";
 import { Button } from '../ui/button';
 import { FiMoreVertical } from "react-icons/fi";
@@ -33,6 +33,7 @@ import QuickLinkForm from '../QuickLinkForm';
 
 import { db, auth } from '@/config/firebase';
 import { getDoc, doc } from 'firebase/firestore';
+import QuickLinkActions from '../QuickLinkActions';
 
 const Sidebar = () => {
     const [quickLinks, setQuickLinks] = useState<{ title: string, url: string }[]>([])
@@ -57,7 +58,7 @@ const Sidebar = () => {
             const quickLinkDoc = await getDoc(quickLinkRef);
             if (quickLinkDoc.exists()) {
                 const quickLinksData = quickLinkDoc.data().quickLinks ?? [];
-                console.log(quickLinksData);
+                // console.log(quickLinksData);
                 setQuickLinks(quickLinksData);
             }
             else {
@@ -109,12 +110,29 @@ const Sidebar = () => {
 
                 <div className='flex flex-col gap-2 mt-2'>
                     {quickLinks.map((quicklink, index) => (
-                        <Link href={quicklink.url} key={index} className='py-1 px-2 flex gap-2 text-light-2 hover:text-light-3 hover:underline'>
-                            <SidebarIcon link={quicklink.url} className='w-6 h-6' />
-                            <span>
-                                {quicklink.title}
-                            </span>
-                        </Link>
+                        <div key={index} className='flex'>
+                            <Link href={quicklink.url} className='grow py-1 px-2 flex gap-2 text-light-2 hover:text-light-3 hover:underline'>
+                                <SidebarIcon link={quicklink.url} className='w-6 h-6' />
+                                <span>
+                                    {quicklink.title}
+                                </span>
+                            </Link>
+                            <div className='flex justify-end'>
+                                <Popover>
+                                    <PopoverTrigger>
+                                        <div className='rounded-full p-1 text-light-4 hover:text-light-1 hover:bg-dark-2'>
+                                            <FiMoreVertical className='text-xl' />
+                                        </div>
+                                    </PopoverTrigger>
+                                    <PopoverContent className='bg-dark-2 border-none w-[180px] transform translate-y-2 -translate-x-18 rounded-xl'>
+                                        <QuickLinkActions
+                                            title={quicklink.title}
+                                            url={quicklink.url}
+                                        />
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+                        </div>
                     ))}
                 </div>
             </div>

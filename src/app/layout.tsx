@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { DM_Sans as FontSans } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
+import { UserProvider } from "@/context/UserContext";
+
 
 const fontsans = FontSans({ subsets: ["latin"] });
 
@@ -17,10 +19,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${fontsans.className} min-h-screen bg-dark-1`}>
-        <Toaster />
-        {children}
-      </body>
+      <UserProvider>
+        <body className={`${fontsans.className} min-h-screen bg-dark-1`}>
+          <Toaster />
+          {children}
+        </body>
+      </UserProvider>
     </html>
   );
 }
