@@ -1,11 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState } from "react";
-
-type User = {
-    username: string;
-    firstName: string;
-};
+import { User } from "@/constants/types";
 
 type UserContextType = {
     isLoggedIn: boolean;
@@ -24,17 +20,24 @@ const defaultUserContext: UserContextType = {
 
 const UserContext = createContext<UserContextType>(defaultUserContext);
 
-export const UserProvider = ({ children }: { children: React.ReactNode }) => {
+export const useUser = (): UserContextType => {
+    const context = useContext(UserContext);
+    if (!context) {
+        throw new Error("useUser must be used within a UserProvider");
+    }
+    return context;
+}
+
+type UserProviderProps = {
+    children: React.ReactNode;
+};
+
+export const UserProvider = ({ children }: UserProviderProps) => {
     const [user, setUser] = useState<User>(defaultUserContext.user);
-    const isLoggedIn = user.username !== "";
 
     return (
-        <UserContext.Provider value={defaultUserContext}>
+        <UserContext.Provider value={{ isLoggedIn: !!user.username, user, setUser }}>
             {children}
         </UserContext.Provider>
     );
-}
-
-export const useUser = () => {
-    return useContext(UserContext);
-}
+};

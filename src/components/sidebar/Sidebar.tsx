@@ -34,9 +34,13 @@ import QuickLinkForm from '../QuickLinkForm';
 import { db, auth } from '@/config/firebase';
 import { getDoc, doc } from 'firebase/firestore';
 import QuickLinkActions from '../QuickLinkActions';
+import { useSidebar } from '@/context/SidebarContext';
+import { useUser } from '@/context/UserContext';
 
 const Sidebar = () => {
-    const [quickLinks, setQuickLinks] = useState<{ title: string, url: string }[]>([])
+    const { user } = useUser();
+    // const [quickLinks, setQuickLinks] = useState<{ title: string, url: string }[]>([])
+    const { quickLinks, setQuickLinks } = useSidebar();
 
     useEffect(() => {
         const fetchQuickLinks = async () => {
@@ -65,8 +69,15 @@ const Sidebar = () => {
                 console.log('No quicklinks found');
             }
         }
-        fetchQuickLinks()
-    }, [])
+        // fetchQuickLinks()
+
+        if (quickLinks.length === 0) {
+            fetchQuickLinks()
+        }
+        else {
+            console.log('Quicklinks already fetched');
+        }
+    }, [quickLinks])
 
     return (
         <div className='h-screen w-[300px] flex flex-col bg-dark-0'>
@@ -138,7 +149,7 @@ const Sidebar = () => {
             </div>
 
             <div className='px-4 py-4 flex justify-between items-center'>
-                <span className='text-xl'>Username</span>
+                <span className='text-xl'>{user.firstName}</span>
                 <Popover>
                     <PopoverTrigger>
                         <div className='rounded-full p-1 text-light-4 hover:text-light-1 hover:bg-dark-2'>

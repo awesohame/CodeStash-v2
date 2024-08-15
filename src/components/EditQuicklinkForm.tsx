@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input"
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { db, auth } from '@/config/firebase'
 import toast from 'react-hot-toast'
+import { useSidebar } from '@/context/SidebarContext'
 
 const editQuicklinkSchema = z.object({
     title: z.string().min(1, "Title must be at least 1 character long").max(100, "Title must be less than 100 characters"),
@@ -32,6 +33,8 @@ const EditQuicklinkForm = (
         url: string
     }
 ) => {
+    const { quickLinks, setQuickLinks } = useSidebar();
+
     const form = useForm<z.infer<typeof editQuicklinkSchema>>({
         resolver: zodResolver(editQuicklinkSchema),
         defaultValues: {
@@ -66,6 +69,8 @@ const EditQuicklinkForm = (
                 await updateDoc(quickLinkRef, {
                     quickLinks: existingQuickLinks
                 });
+
+                setQuickLinks(existingQuickLinks);
                 toast.success('Quicklink updated successfully');
             } else {
                 console.error('User data not found');

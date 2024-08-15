@@ -60,6 +60,8 @@ const Signin = ({
                 username: userData?.username,
                 firstName: userData?.firstName
             });
+            // console.log(user.username)
+            // console.log(user.firstName)
             router.push(`/${userDoc.data()?.username}`);
         } catch (error) {
             console.error(error)

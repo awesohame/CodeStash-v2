@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import toast from 'react-hot-toast'
+import { useSidebar } from '@/context/SidebarContext'
 
 const quickLinkSchema = z.object({
     title: z.string().min(1, "Title must be at least 1 character long").max(100, "Title must be less than 100 characters"),
@@ -25,6 +26,8 @@ const quickLinkSchema = z.object({
 });
 
 const QuickLinkForm = () => {
+    const { quickLinks, setQuickLinks } = useSidebar();
+
     const form = useForm<z.infer<typeof quickLinkSchema>>({
         resolver: zodResolver(quickLinkSchema),
         defaultValues: {
@@ -66,6 +69,13 @@ const QuickLinkForm = () => {
                     ]
                 });
             }
+            setQuickLinks([
+                ...quickLinks,
+                {
+                    title: values.title,
+                    url: values.url
+                }
+            ]);
             toast.success("Quicklink added successfully")
             form.reset()
         } catch (error) {

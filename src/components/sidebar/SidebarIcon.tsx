@@ -14,13 +14,15 @@ const SidebarIcon = ({
 }) => {
     const [logoUrl, setLogoUrl] = useState<string | null>(null)
 
-    useEffect(() => {
-        const fetchFavicon = async () => {
-            const res = await axios.post('/api/v1/getfavicon', { url: link })
-            setLogoUrl(res.data)
-        }
-        fetchFavicon()
-    }, [link])
+    // Dont use until api is fixed 
+
+    // useEffect(() => {
+    //     const fetchFavicon = async () => {
+    //         const res = await axios.post('/api/v1/getfavicon', { url: link })
+    //         setLogoUrl(res.data)
+    //     }
+    //     fetchFavicon()
+    // }, [link])
 
     return (
         <div className={cn(
