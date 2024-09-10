@@ -1,17 +1,15 @@
 "use client";
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { FaPlus } from "react-icons/fa6";
 import { Button } from '../ui/button';
 import { FiMoreVertical } from "react-icons/fi";
-
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
-
 import {
     Dialog,
     DialogContent,
@@ -20,38 +18,26 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-
 import Link from 'next/link';
 import SidebarIcon from './SidebarIcon';
 import QuickLinkForm from '../QuickLinkForm';
-
 import { db, auth } from '@/config/firebase';
 import { getDoc, doc } from 'firebase/firestore';
 import QuickLinkActions from '../QuickLinkActions';
 import { useSidebar } from '@/context/SidebarContext';
-import { useUser } from '@/context/UserContext';
+import { useAuth } from '@/context/AuthContext';
 
 const Sidebar = () => {
-    const { user } = useUser();
-    // const [quickLinks, setQuickLinks] = useState<{ title: string, url: string }[]>([])
+    const { user } = useAuth();
     const { quickLinks, setQuickLinks } = useSidebar();
 
     useEffect(() => {
         const fetchQuickLinks = async () => {
-            // fetch quick links
-
-            // setQuickLinks([
-            //     { title: 'Google', url: 'https://google.com' },
-            //     { title: 'Facebook', url: 'https://facebook.com' },
-            //     { title: 'Twitter', url: 'https://twitter.com' },
-            // ])
-
             const user = auth.currentUser;
             if (!user) {
                 console.error('User not logged in');
@@ -62,14 +48,12 @@ const Sidebar = () => {
             const quickLinkDoc = await getDoc(quickLinkRef);
             if (quickLinkDoc.exists()) {
                 const quickLinksData = quickLinkDoc.data().quickLinks ?? [];
-                // console.log(quickLinksData);
                 setQuickLinks(quickLinksData);
             }
             else {
                 console.log('No quicklinks found');
             }
         }
-        // fetchQuickLinks()
 
         if (quickLinks.length === 0) {
             fetchQuickLinks()
@@ -77,23 +61,23 @@ const Sidebar = () => {
         else {
             console.log('Quicklinks already fetched');
         }
-    }, [quickLinks])
+    }, [quickLinks, setQuickLinks])
 
     return (
-        <div className='h-screen w-[300px] flex flex-col bg-dark-0'>
-            <div className='w-full bg-primary-1 flex items-center justify-center px-4 py-3'>
-                <h1 className='text-light-4 text-3xl'>CodeStash</h1>
+        <div className='h-screen w-[300px] flex flex-col bg-dark-1 bg-opacity-80 backdrop-blur-lg'>
+            <div className='w-full bg-gradient-to-r from-dark-4 to-dark-5 flex items-center justify-center px-4 py-5'>
+                <h1 className='text-light-1 text-3xl font-bold'>CodeStash</h1>
             </div>
-            <div className='px-4 grow w-full bg-primary-2 mt-2'>
-                <div className='text-xl text-light-2 flex justify-between items-center'>
-                    <span>Quick Links</span>
+            <div className='px-4 grow w-full bg-dark-2 bg-opacity-30 mt-2'>
+                <div className='text-xl text-light-1 flex justify-between items-center mb-4'>
+                    <span className='font-semibold'>Quick Links</span>
 
                     <Dialog>
                         <DialogTrigger>
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <div className='rounded-full hover:bg-dark-2 text-light-4 hover:text-light-1 p-2 h-auto bg-transparent cursor-pointer'>
+                                        <div className='rounded-full hover:bg-dark-4 text-light-2 hover:text-light-1 p-2 h-auto bg-transparent cursor-pointer transition-colors duration-200'>
                                             <FaPlus className='text-xl' />
                                         </div>
                                     </TooltipTrigger>
@@ -103,36 +87,31 @@ const Sidebar = () => {
                                 </Tooltip>
                             </TooltipProvider>
                         </DialogTrigger>
-                        <DialogContent
-                            className='bg-dark-4 border-none rounded-xl'
-                        >
+                        <DialogContent className='bg-dark-3 border-none rounded-xl'>
                             <DialogHeader>
-                                <DialogTitle className='text-dark-1 text-3xl'>Create Quicklink</DialogTitle>
+                                <DialogTitle className='text-light-1 text-2xl font-semibold'>Create Quicklink</DialogTitle>
                                 <DialogDescription>
                                     <QuickLinkForm />
                                 </DialogDescription>
                             </DialogHeader>
                         </DialogContent>
                     </Dialog>
-
-
-
                 </div>
 
                 <div className='flex flex-col gap-2 mt-2'>
                     {quickLinks.map((quicklink, index) => (
-                        <div key={index} className='flex'>
-                            <Link href={quicklink.url} className='grow py-1 px-2 flex gap-2 text-light-2 hover:text-light-3 hover:underline'>
-                                <SidebarIcon link={quicklink.url} className='w-6 h-6' />
-                                <span>
+                        <div key={index} className='flex items-center bg-dark-3 bg-opacity-30 rounded-lg hover:bg-opacity-50 transition-all duration-200'>
+                            <Link href={quicklink.url} className='grow py-2 px-3 flex gap-2 text-light-2 hover:text-light-1'>
+                                <SidebarIcon link={quicklink.url} className='w-5 h-5' />
+                                <span className='text-sm'>
                                     {quicklink.title}
                                 </span>
                             </Link>
-                            <div className='flex justify-end'>
+                            <div className='flex justify-end pr-2'>
                                 <Popover>
                                     <PopoverTrigger>
-                                        <div className='rounded-full p-1 text-light-4 hover:text-light-1 hover:bg-dark-2'>
-                                            <FiMoreVertical className='text-xl' />
+                                        <div className='rounded-full p-1 text-light-3 hover:text-light-1 hover:bg-dark-4 transition-colors duration-200'>
+                                            <FiMoreVertical className='text-lg' />
                                         </div>
                                     </PopoverTrigger>
                                     <PopoverContent className='bg-dark-2 border-none w-[180px] transform translate-y-2 -translate-x-18 rounded-xl'>
@@ -148,24 +127,24 @@ const Sidebar = () => {
                 </div>
             </div>
 
-            <div className='px-4 py-4 flex justify-between items-center'>
-                <span className='text-xl'>{user.firstName}</span>
+            <div className='px-4 py-4 flex justify-between items-center bg-dark-3 bg-opacity-30'>
+                <span className='text-xl text-light-1 font-semibold'>{user?.displayName || user?.email?.split("@")[0]}</span>
+
                 <Popover>
                     <PopoverTrigger>
-                        <div className='rounded-full p-1 text-light-4 hover:text-light-1 hover:bg-dark-2'>
-                            <FiMoreVertical className=' text-xl' />
+                        <div className='rounded-full p-2 text-light-3 hover:text-light-1 hover:bg-dark-4 transition-colors duration-200'>
+                            <FiMoreVertical className='text-xl' />
                         </div>
                     </PopoverTrigger>
                     <PopoverContent className='bg-dark-2 border-none w-[200px] transform -translate-y-3 -translate-x-18 rounded-xl'>
                         <div className='flex flex-col gap-2'>
-                            <Button className='text-dark-0 bg-light-4 hover:bg-dark-4 p-0'>
-                                <Link href='/settings' className='h-full w-full flex justify-center items-center'>Settings</Link></Button>
-                            <Button className='text-light-1 bg-red-600 hover:bg-red-700'>Logout</Button>
+                            <Button className='text-dark-0 bg-light-2 hover:bg-light-3 transition-colors duration-200'>
+                                <Link href='/settings' className='h-full w-full flex justify-center items-center'>Settings</Link>
+                            </Button>
+                            <Button className='text-light-1 bg-red-600 hover:bg-red-700 transition-colors duration-200'>Logout</Button>
                         </div>
                     </PopoverContent>
                 </Popover>
-
-
             </div>
         </div>
     )

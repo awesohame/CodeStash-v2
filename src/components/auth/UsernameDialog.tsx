@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -17,9 +16,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from '@/lib/utils';
-
-import { auth, db, googleProvider } from '@/config/firebase';
-import { doc, setDoc, getDocs, query, collection, where, updateDoc } from 'firebase/firestore';
+import { auth, db } from '@/config/firebase';
+import { doc, getDocs, query, collection, where, updateDoc } from 'firebase/firestore';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const usernameSchema = z.object({
     username: z.string().min(3, "Username must be at least 3 characters long").max(20, "Username must be less than 20 characters"),
@@ -65,14 +64,10 @@ const UsernameDialog = ({
     }
 
     async function onSubmit(values: z.infer<typeof usernameSchema>) {
-        // find through email and update username
         try {
-            const user = auth.currentUser;
-            if (!user) {
-                throw new Error("User not found");
-            }
-            if (!user.email) {
-                throw new Error("User email not found");
+            const user = auth.user;
+            if (!user || !user.email) {
+                throw new Error("User not found or email not available");
             }
             await updateDoc(doc(db, 'users', user.email), {
                 username: values.username.toLowerCase(),
@@ -86,49 +81,60 @@ const UsernameDialog = ({
     }
 
     return (
-        <div
-            className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 ${isOpen ? "" : "hidden"
-                }`}
-        >
-            <div className="bg-dark-3 rounded-lg p-8 w-96">
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-6 py-2">
-                        <FormField
-                            control={form.control}
-                            name="username"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className='text-light-1 text-lg'>Choose a Username</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            placeholder="Enter your username"
-                                            aria-label="Username"
-                                            {...field}
-                                            onBlur={handleUsernameBlur}
-                                        />
-                                    </FormControl>
-                                    {usernameAvailable === false && (
-                                        <FormMessage className="text-red-500 font-medium">Username is already taken.</FormMessage>
+        <AnimatePresence>
+            {isOpen && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                >
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.9, opacity: 0 }}
+                        className="bg-dark-3 rounded-lg p-8 w-96 shadow-xl"
+                    >
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                                <FormField
+                                    control={form.control}
+                                    name="username"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className='text-light-1 text-lg'>Choose a Username</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    placeholder="Enter your username"
+                                                    className="bg-dark-2 text-light-1 border-dark-1"
+                                                    {...field}
+                                                    onBlur={handleUsernameBlur}
+                                                />
+                                            </FormControl>
+                                            {usernameAvailable === false && (
+                                                <FormMessage className="text-light-4">Username is already taken.</FormMessage>
+                                            )}
+                                            {usernameAvailable === true && (
+                                                <FormMessage className="text-light-3">Username is available.</FormMessage>
+                                            )}
+                                        </FormItem>
                                     )}
-                                    {usernameAvailable === true && (
-                                        <FormMessage className="text-green-500 font-medium">Username is available.</FormMessage>
+                                />
+                                <Button type='submit'
+                                    className={cn(
+                                        "w-full bg-dark-5 hover:bg-dark-4 text-light-1",
+                                        !usernameAvailable && "opacity-50 cursor-not-allowed"
                                     )}
-                                </FormItem>
-                            )}
-                        />
-                        <Button type='submit'
-                            className={cn(
-                                "w-full bg-dark-1 hover:bg-dark-0",
-                                !usernameAvailable && "cursor-not-allowed opacity-50"
-                            )}
-                            disabled={!usernameAvailable}
-                        >
-                            Sign Up
-                        </Button>
-                    </form>
-                </Form>
-            </div>
-        </div>
+                                    disabled={!usernameAvailable}
+                                >
+                                    Confirm Username
+                                </Button>
+                            </form>
+                        </Form>
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
     );
 };
 

@@ -10,17 +10,17 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-    const { currentUser } = useAuth();
+    const { user } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
-        // console.log(currentUser);
-        if (!currentUser) {
+        // console.log(user);
+        if (!user) {
             router.push("/");
         }
-    }, [currentUser, router]);
+    }, [user, router]);
 
-    if (!currentUser) {
+    if (!user) {
         return <Loader />;
     }
 

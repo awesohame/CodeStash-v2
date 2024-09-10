@@ -5,10 +5,12 @@ import { auth } from '@/config/firebase';
 import { onAuthStateChanged, User } from "firebase/auth";
 
 type AuthContextType = {
-    currentUser: User | null;
+    user: User | null;
+    username?: string;
+    setUsername: (username: string) => void;
 }
 
-const AuthContext = createContext<AuthContextType>({ currentUser: null });
+const AuthContext = createContext<AuthContextType>({ user: null, username: '', setUsername: () => { } });
 
 export const useAuth = (): AuthContextType => {
     const context = useContext(AuthContext);
@@ -24,8 +26,9 @@ type AuthProviderProps = {
 };
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-    const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const [user, setCurrentUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const [username, setUsername] = useState('');
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -38,7 +41,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ currentUser }}>
+        <AuthContext.Provider value={{ user, username, setUsername }}>
             {!loading && children}
         </AuthContext.Provider>
     );

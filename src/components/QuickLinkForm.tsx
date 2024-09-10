@@ -39,7 +39,7 @@ const QuickLinkForm = () => {
     async function onSubmit(values: z.infer<typeof quickLinkSchema>) {
         console.log(values)
         try {
-            const user = auth.currentUser
+            const user = auth.currentUser;
             if (!user) {
                 console.error("User not logged in")
                 return

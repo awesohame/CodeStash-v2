@@ -9,7 +9,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import axios from 'axios';
 import { cn } from '@/lib/utils';
 
 interface Stash {
@@ -24,8 +23,7 @@ const StashCards = ({ className, style }: { className: string, style: React.CSSP
 
     useEffect(() => {
         const fetchStashes = async () => {
-            // fetch stashes
-            // Replace the hardcoded stashes with fetched data from your backend.
+            // Simulated fetch, replace with actual API call
             setStashes([
                 {
                     title: 'Grocery List',
@@ -67,23 +65,23 @@ const StashCards = ({ className, style }: { className: string, style: React.CSSP
             {stashes.map((stash, idx) => (
                 <Card key={idx} className={
                     cn(
-                        'bg-light-4 border-none',
+                        'bg-light-1 bg-opacity-10 backdrop-blur-lg border-none shadow-lg hover:shadow-xl transition-all duration-300',
                         className,
                     )
                 } style={style}>
                     <CardHeader>
-                        <CardTitle className='text-dark-1'>{stash.title}</CardTitle>
+                        <CardTitle className='text-light-1 text-xl font-semibold'>{stash.title}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <CardDescription className='text-dark-3 text-base'>{stash.desc}</CardDescription>
-                        <div className='flex flex-wrap gap-2 mt-2'>
+                        <CardDescription className='text-light-2 text-base'>{stash.desc}</CardDescription>
+                        <div className='flex flex-wrap gap-2 mt-3'>
                             {stash.tags.map((tag, idx) => (
-                                <span key={idx} className='text-sm text-light-1 bg-dark-2 px-3 py-1 rounded-full'>{tag}</span>
+                                <span key={idx} className='text-xs text-light-1 bg-dark-4 bg-opacity-50 px-3 py-1 rounded-full'>{tag}</span>
                             ))}
                         </div>
                     </CardContent>
                     <CardFooter>
-                        <p className='text-dark-2 text-sm'>{stash.created_at}</p>
+                        <p className='text-light-3 text-sm'>{stash.created_at}</p>
                     </CardFooter>
                 </Card>
             ))}

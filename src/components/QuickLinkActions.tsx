@@ -7,6 +7,7 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
+    DialogClose
 } from "@/components/ui/dialog"
 
 import { MdEdit, MdDeleteForever } from "react-icons/md";
@@ -35,7 +36,7 @@ const QuickLinkActions = (
                             className='bg-dark-4 border-none rounded-xl'
                         >
                             <DialogHeader>
-                                <DialogTitle className='text-dark-1 text-3xl'>Create Quicklink</DialogTitle>
+                                <DialogTitle className='text-dark-1 text-3xl'>Edit Quicklink</DialogTitle>
                                 <DialogDescription>
                                     <EditQuicklinkForm title={title} url={url} />
                                 </DialogDescription>
