@@ -65,7 +65,7 @@ const UsernameDialog = ({
 
     async function onSubmit(values: z.infer<typeof usernameSchema>) {
         try {
-            const user = auth.user;
+            const user = auth.currentUser;
             if (!user || !user.email) {
                 throw new Error("User not found or email not available");
             }
