@@ -56,7 +56,7 @@ export const StashProvider = ({ children }: StashProviderProps) => {
             const stashesData = querySnapshot.docs.map(doc => ({
                 ...(doc.data() as Stash),
                 id: doc.id,
-                createdAt: doc.data().createdAt.toDate().toISOString()
+                // createdAt: doc.data().createdAt.toDate().toISOString()
             }));
             setStashes(stashesData);
         } catch (error) {

@@ -1,45 +1,58 @@
 'use client'
 
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useStash } from '@/context/StashContext'
 import { useAuth } from '@/context/AuthContext'
-import { CodeBlock, CopyBlock, dracula } from 'react-code-blocks'
+import CodeMirror from '@uiw/react-codemirror';
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { PencilIcon, TrashIcon, ClockIcon, ArrowLeftIcon, SaveIcon, XIcon } from 'lucide-react'
+import { PencilIcon, TrashIcon, ClockIcon, ArrowLeftIcon, SaveIcon, XIcon, PlusIcon, CodeIcon, TextIcon } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { Stash } from '@/constants/types'
+import { Stash, StashSection } from '@/constants/types'
 
 export default function StashMain() {
     const { stashId } = useParams()
     const { stashes, updateStash, deleteStash, readStashes } = useStash()
-    const { user } = useAuth()
+    const { user, username } = useAuth()
     const router = useRouter()
     const [isEditing, setIsEditing] = useState(false)
+    const [editedStash, setEditedStash] = useState<Stash | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
+    const [currentStash, setCurrentStash] = useState<Stash | null>(null)
 
-    const stash = useMemo(() => stashes.find(s => s.id === stashId), [stashes, stashId])
-    // console.log(stashes)
-    console.log(stash)
-    const [editedStash, setEditedStash] = useState<Stash | null>(stash || null)
-
+    // Fetch stashes when component mounts
     useEffect(() => {
-        if (user && user.email) {
-            readStashes(user.email)
+        const fetchStashes = async () => {
+            if (user?.email) {
+                await readStashes(user.email)
+                setIsLoading(false)
+            }
         }
+        fetchStashes()
     }, [user])
 
+    // Update current stash when stashId[0] or stashes change
     useEffect(() => {
-        setEditedStash(stash || null)
-    }, [stash])
+        if (!isLoading && stashes.length > 0) {
+            const foundStash = stashes.find(stash => stash.id === stashId[0])
+            setCurrentStash(foundStash || null)
+            console.log('stashes:', stashes)
+            console.log('Current Stash:', foundStash)
+        }
+    }, [stashes])
+
+    if (isLoading) {
+        return <div>Loading...</div>
+    }
 
     if (!user || !user.email) {
         return <div className="flex justify-center items-center h-full">Please log in to view stashes.</div>
     }
 
-    if (!stash) {
+    if (!currentStash) {
         return (
             <div className="flex flex-col items-center justify-center h-full">
                 <p className="text-xl mb-4">Stash not found</p>
@@ -52,25 +65,34 @@ export default function StashMain() {
 
     const handleEdit = () => {
         setIsEditing(true)
-        setEditedStash({ ...stash })
+        setEditedStash({ ...currentStash })
     }
 
     const handleSave = async () => {
         if (editedStash && user.email) {
-            await updateStash(user.email, stashId as string, editedStash)
-            setIsEditing(false)
+            try {
+                await updateStash(user.email, stashId[0] as string, editedStash)
+                setIsEditing(false)
+                await readStashes(user?.email) // Refresh stashes after update
+            } catch (error) {
+                console.error('Error updating stash:', error)
+            }
         }
     }
 
     const handleCancel = () => {
         setIsEditing(false)
-        setEditedStash(stash)
+        setEditedStash(currentStash)
     }
 
     const handleDelete = async () => {
         if (window.confirm('Are you sure you want to delete this stash?') && user.email) {
-            await deleteStash(user.email, stashId as string)
-            router.push('/dashboard')
+            try {
+                await deleteStash(user.email, stashId[0] as string)
+                router.push(`/${username}`)
+            } catch (error) {
+                console.error('Error deleting stash:', error)
+            }
         }
     }
 
@@ -84,6 +106,22 @@ export default function StashMain() {
             if (!prev) return null
             const newSections = [...prev.stashSections]
             newSections[index] = { ...newSections[index], content }
+            return { ...prev, stashSections: newSections }
+        })
+    }
+
+    const addSection = (type: 'text' | 'code') => {
+        setEditedStash(prev => {
+            if (!prev) return null
+            const newSection: StashSection = { type, content: '' }
+            return { ...prev, stashSections: [...prev.stashSections, newSection] }
+        })
+    }
+
+    const removeSection = (index: number) => {
+        setEditedStash(prev => {
+            if (!prev) return null
+            const newSections = prev.stashSections.filter((_, i) => i !== index)
             return { ...prev, stashSections: newSections }
         })
     }
@@ -103,7 +141,7 @@ export default function StashMain() {
                         className="text-3xl font-bold mb-2"
                     />
                 ) : (
-                    <h1 className="text-3xl font-bold mb-2">{stash.title}</h1>
+                    <h1 className="text-3xl font-bold mb-2">{currentStash.title}</h1>
                 )}
                 {isEditing ? (
                     <Textarea
@@ -113,18 +151,18 @@ export default function StashMain() {
                         className="mb-4"
                     />
                 ) : (
-                    <p className="text-gray-400 mb-4">{stash.desc}</p>
+                    <p className="text-gray-400 mb-4">{currentStash.desc}</p>
                 )}
                 <div className="flex flex-wrap gap-2 mb-4">
-                    {stash.tags.map((tag, index) => (
+                    {currentStash.tags.map((tag, index) => (
                         <Badge key={index} variant="secondary">{tag}</Badge>
                     ))}
                 </div>
                 <div className="flex items-center text-sm text-gray-400 mb-4">
                     <ClockIcon className="w-4 h-4 mr-2" />
-                    <span>Created: {new Date(stash.createdAt).toLocaleString()}</span>
+                    <span>Created: {new Date(currentStash.createdAt).toLocaleString()}</span>
                     <span className="mx-2">|</span>
-                    <span>Updated: {new Date(stash.updatedAt as string).toLocaleString()}</span>
+                    <span>Updated: {new Date(currentStash.updatedAt as string).toLocaleString()}</span>
                 </div>
                 <div className="flex gap-4">
                     {isEditing ? (
@@ -153,7 +191,7 @@ export default function StashMain() {
                 </div>
             </div>
             <div className="space-y-6">
-                {(isEditing && editedStash?.stashSections ? editedStash?.stashSections : stash.stashSections).map((section, index) => (
+                {(isEditing && (editedStash) ? editedStash?.stashSections : currentStash.stashSections).map((section, index) => (
                     <div key={index} className="bg-dark-4 rounded-lg p-4">
                         {section.type === 'text' ? (
                             isEditing ? (
@@ -166,19 +204,33 @@ export default function StashMain() {
                                 <div className="prose prose-invert">{section.content}</div>
                             )
                         ) : (
-                            <CopyBlock
-                                text={section.content}
-                                language="javascript"
-                                showLineNumbers={true}
-                                theme={dracula}
-                                // wrapLines
-                                codeBlock={isEditing}
-                            // onChanged={(code) => handleSectionChange(index, code)}
+                            <CodeMirror
+                                value={section.content}
+                                editable={isEditing}
                             />
+                        )}
+                        {isEditing && (
+                            <Button onClick={() => removeSection(index)} variant="destructive" className="mt-2">
+                                Remove Section
+                            </Button>
                         )}
                     </div>
                 ))}
             </div>
+            {isEditing && (
+                <div className="mt-4 flex gap-2">
+                    <Button onClick={() => addSection('text')} className="flex items-center">
+                        <PlusIcon className="w-4 h-4 mr-2" />
+                        <TextIcon className="w-4 h-4 mr-2" />
+                        Add Text Section
+                    </Button>
+                    <Button onClick={() => addSection('code')} className="flex items-center">
+                        <PlusIcon className="w-4 h-4 mr-2" />
+                        <CodeIcon className="w-4 h-4 mr-2" />
+                        Add Code Section
+                    </Button>
+                </div>
+            )}
         </div>
     )
 }

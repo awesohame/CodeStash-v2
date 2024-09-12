@@ -14,7 +14,7 @@ export type StashSection = {
 };
 
 export type Stash = {
-    id?: string; // Optional, as it might not exist when creating a new stash
+    id?: string;
     createdAt: string;
     updatedAt?: string;
     desc: string;
