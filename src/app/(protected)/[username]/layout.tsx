@@ -11,13 +11,17 @@ export const metadata: Metadata = {
 
 const DashboardLayout = ({ children }: Readonly<{ children: ReactNode }>) => {
     return (
-        <main className="text-light-1 w-full h-full min-h-screen flex bg-gradient-to-br from-dark-2 to-dark-4">
+        <main className="text-light-1 w-full h-screen flex bg-dark-2 overflow-hidden">
             <SidebarProvider>
-                <Sidebar />
+                <div className="fixed h-screen">
+                    <Sidebar />
+                </div>
             </SidebarProvider>
             <StashProvider>
-                <div className="w-full h-full min-h-screen bg-dark-3 bg-opacity-50 backdrop-blur-md flex flex-col">
-                    {children}
+                <div className="flex-1 ml-[300px] overflow-y-auto">
+                    <div className="min-h-screen bg-dark-3 backdrop-blur-md flex flex-col">
+                        {children}
+                    </div>
                 </div>
             </StashProvider>
         </main>
