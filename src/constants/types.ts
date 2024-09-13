@@ -21,5 +21,6 @@ export type Stash = {
     stashSections: StashSection[];
     tags: string[];
     title: string;
+    isPinned: boolean;
 };
 

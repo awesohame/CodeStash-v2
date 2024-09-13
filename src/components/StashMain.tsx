@@ -24,6 +24,7 @@ export default function StashMain() {
     const [currentStash, setCurrentStash] = useState<Stash | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [copiedSections, setCopiedSections] = useState<{ [key: number]: boolean }>({})
+    const [newTag, setNewTag] = useState('')
 
     const fetchStashes = useCallback(async () => {
         if (user?.email) {
@@ -121,6 +122,24 @@ export default function StashMain() {
             .catch((error) => console.error('Failed to copy code:', error))
     }
 
+    const handleAddTag = useCallback(() => {
+        if (newTag.trim() && editedStash && user?.email) {
+            const trimmedTag = newTag.trim();
+            if (!editedStash.tags.includes(trimmedTag)) {
+                const updatedTags = [...editedStash.tags, trimmedTag];
+                setEditedStash(prev => prev ? { ...prev, tags: updatedTags } : null);
+            }
+            setNewTag('');
+        }
+    }, [newTag, editedStash, user?.email]);
+
+    const handleRemoveTag = useCallback((tagToRemove: string) => {
+        if (editedStash) {
+            const updatedTags = editedStash.tags.filter(tag => tag !== tagToRemove)
+            setEditedStash(prev => prev ? { ...prev, tags: updatedTags } : null)
+        }
+    }, [editedStash])
+
     if (isLoading || !currentStash) {
         return <div className="flex justify-center items-center h-screen bg-dark-2">
             <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-light-3"></div>
@@ -156,11 +175,40 @@ export default function StashMain() {
                         ) : (
                             <p className="text-light-2 mb-4 text-lg">{currentStash.desc}</p>
                         )}
-                        <div className="flex flex-wrap gap-2 mb-4">
-                            {currentStash.tags.map((tag, index) => (
-                                <Badge key={index} variant="secondary" className="bg-dark-5 text-light-1 shadow-md hover:bg-dark-4 transition-colors duration-200">{tag}</Badge>
-                            ))}
-                        </div>
+                        {isEditing ? (
+                            <div className="mb-4">
+                                <div className="flex flex-wrap gap-2 mb-2">
+                                    {editedStash?.tags.map((tag, index) => (
+                                        <Badge key={index} variant="secondary" className="bg-dark-5 text-light-1 shadow-md">
+                                            {tag}
+                                            <button
+                                                onClick={() => handleRemoveTag(tag)}
+                                                className="ml-2 text-light-3 hover:text-light-1"
+                                            >
+                                                <XIcon className="w-3 h-3" />
+                                            </button>
+                                        </Badge>
+                                    ))}
+                                </div>
+                                <div className="flex">
+                                    <Input
+                                        value={newTag}
+                                        onChange={(e) => setNewTag(e.target.value)}
+                                        placeholder="Add new tag"
+                                        className="mr-2 bg-dark-2 text-light-1 border-dark-4 shadow-inner"
+                                    />
+                                    <Button onClick={handleAddTag} className="bg-dark-5 hover:bg-dark-4 text-light-1">
+                                        Add Tag
+                                    </Button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex flex-wrap gap-2 mb-4">
+                                {currentStash.tags.map((tag, index) => (
+                                    <Badge key={index} variant="secondary" className="bg-dark-5 text-light-1 shadow-md hover:bg-dark-4 transition-colors duration-200">{tag}</Badge>
+                                ))}
+                            </div>
+                        )}
                         <div className="flex items-center text-sm text-light-3 mb-6">
                             <ClockIcon className="w-4 h-4 mr-2" />
                             <span>Created: {new Date(currentStash.createdAt).toLocaleString()}</span>
