@@ -1,12 +1,7 @@
-import React from 'react'
-
-import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore'
-import { db, auth } from '@/config/firebase'
-
+import React, { useState } from 'react'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-
 import {
     Form,
     FormControl,
@@ -20,13 +15,24 @@ import { Input } from "@/components/ui/input"
 import toast from 'react-hot-toast'
 import { useSidebar } from '@/context/SidebarContext'
 
+const MAX_FILE_SIZE = 5000000; // 5MB
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/svg+xml"];
+
 const quickLinkSchema = z.object({
     title: z.string().min(1, "Title must be at least 1 character long").max(100, "Title must be less than 100 characters"),
     url: z.string().url("Please enter a valid URL"),
+    icon: z.any()
+        .refine((files) => files?.length == 1, "Image is required.")
+        .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
+        .refine(
+            (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type),
+            ".jpg, .jpeg, .png, .webp and .svg files are accepted."
+        ).optional(),
 });
 
 const QuickLinkForm = () => {
-    const { quickLinks, setQuickLinks } = useSidebar();
+    const { addQuickLink } = useSidebar();
+    const [iconPreview, setIconPreview] = useState<string | null>(null);
 
     const form = useForm<z.infer<typeof quickLinkSchema>>({
         resolver: zodResolver(quickLinkSchema),
@@ -37,52 +43,32 @@ const QuickLinkForm = () => {
     });
 
     async function onSubmit(values: z.infer<typeof quickLinkSchema>) {
-        console.log(values)
         try {
-            const user = auth.currentUser;
-            if (!user) {
-                console.error("User not logged in")
-                return
-            }
-            const email = user.email;
-            const quickLinkRef = doc(db, 'quickLinks', email as string);
-            const quickLinkDoc = await getDoc(quickLinkRef);
-            if (quickLinkDoc.exists()) {
-                const existingQuickLinks = quickLinkDoc.data().quickLinks ?? [];
-                const updatedQuickLinks = [
-                    ...existingQuickLinks,
-                    {
-                        title: values.title,
-                        url: values.url
-                    }
-                ];
-                await updateDoc(quickLinkRef, {
-                    quickLinks: updatedQuickLinks
-                });
-            } else {
-                await setDoc(quickLinkRef, {
-                    quickLinks: [
-                        {
-                            title: values.title,
-                            url: values.url
-                        }
-                    ]
-                });
-            }
-            setQuickLinks([
-                ...quickLinks,
-                {
-                    title: values.title,
-                    url: values.url
-                }
-            ]);
+            await addQuickLink({
+                title: values.title,
+                url: values.url,
+            }, values.icon?.[0]);
             toast.success("Quicklink added successfully")
             form.reset()
+            setIconPreview(null)
         } catch (error) {
             toast.error("An error occurred")
             console.error(error)
         }
     }
+
+    const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setIconPreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            setIconPreview(null);
+        }
+    };
 
     return (
         <Form {...form}>
@@ -113,6 +99,30 @@ const QuickLinkForm = () => {
                         </FormItem>
                     )}
                 />
+                <FormField
+                    control={form.control}
+                    name="icon"
+                    render={({ field: { onChange, value, ...field } }) => (
+                        <FormItem>
+                            <FormLabel className='text-light-1 text-lg'>Icon</FormLabel>
+                            <FormControl>
+                                <Input
+                                    type="file"
+                                    accept={ACCEPTED_IMAGE_TYPES.join(',')}
+                                    onChange={(e) => {
+                                        onChange(e.target.files);
+                                        handleIconChange(e);
+                                    }}
+                                    {...field}
+                                />
+                            </FormControl>
+                            {iconPreview && (
+                                <img src={iconPreview} alt="Icon preview" className="mt-2 w-10 h-10 object-cover" />
+                            )}
+                            <FormMessage className='font-medium' />
+                        </FormItem>
+                    )}
+                />
                 <Button type='submit' className="w-full bg-dark-1 hover:bg-dark-0">Add Quicklink</Button>
             </form>
         </Form>
@@ -120,4 +130,3 @@ const QuickLinkForm = () => {
 }
 
 export default QuickLinkForm
-

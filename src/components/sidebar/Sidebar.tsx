@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from 'react'
+import React from 'react'
 import { FaPlus } from "react-icons/fa6";
 import { Button } from '../ui/button';
 import { FiMoreVertical } from "react-icons/fi";
@@ -26,42 +26,14 @@ import {
 import Link from 'next/link';
 import SidebarIcon from './SidebarIcon';
 import QuickLinkForm from '../QuickLinkForm';
-import { db, auth } from '@/config/firebase';
-import { getDoc, doc } from 'firebase/firestore';
 import QuickLinkActions from '../QuickLinkActions';
 import { useSidebar } from '@/context/SidebarContext';
 import { useAuth } from '@/context/AuthContext';
+import Image from 'next/image';
 
 const Sidebar = () => {
     const { user } = useAuth();
-    const { quickLinks, setQuickLinks } = useSidebar();
-
-    useEffect(() => {
-        const fetchQuickLinks = async () => {
-            const user = auth.currentUser;
-            if (!user) {
-                console.error('User not logged in');
-                return;
-            }
-            const email = user.email;
-            const quickLinkRef = doc(db, 'quickLinks', email as string);
-            const quickLinkDoc = await getDoc(quickLinkRef);
-            if (quickLinkDoc.exists()) {
-                const quickLinksData = quickLinkDoc.data().quickLinks ?? [];
-                setQuickLinks(quickLinksData);
-            }
-            else {
-                console.log('No quicklinks found');
-            }
-        }
-
-        if (quickLinks.length === 0) {
-            fetchQuickLinks()
-        }
-        else {
-            console.log('Quicklinks already fetched');
-        }
-    }, [quickLinks, setQuickLinks])
+    const { quickLinks } = useSidebar();
 
     return (
         <div className='w-[300px] h-screen flex flex-col bg-dark-1 bg-opacity-80 backdrop-blur-lg'>
@@ -105,7 +77,17 @@ const Sidebar = () => {
                         {quickLinks.map((quicklink, index) => (
                             <div key={index} className='flex items-center bg-dark-3 bg-opacity-30 rounded-lg hover:bg-opacity-50 transition-all duration-200'>
                                 <Link href={quicklink.url} className='grow py-2 px-3 flex gap-2 text-light-2 hover:text-light-1'>
-                                    <SidebarIcon link={quicklink.url} className='w-5 h-5' />
+                                    {quicklink.icon ? (
+                                        <Image
+                                            src={quicklink.icon}
+                                            alt={quicklink.title}
+                                            width={20}
+                                            height={20}
+                                            className="rounded"
+                                        />
+                                    ) : (
+                                        <SidebarIcon link={quicklink.url} className='w-5 h-5' />
+                                    )}
                                     <span className='text-sm'>
                                         {quicklink.title}
                                     </span>
@@ -121,6 +103,7 @@ const Sidebar = () => {
                                             <QuickLinkActions
                                                 title={quicklink.title}
                                                 url={quicklink.url}
+                                                icon={quicklink.icon}
                                             />
                                         </PopoverContent>
                                     </Popover>
