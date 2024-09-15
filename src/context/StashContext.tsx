@@ -15,6 +15,7 @@ type StashContextType = {
     togglePinStash: (userEmail: string, id: string) => Promise<void>;
     addTag: (userEmail: string, id: string, tag: string) => Promise<void>;
     removeTag: (userEmail: string, id: string, tag: string) => Promise<void>;
+    searchStashes: (query: string, userEmail: string) => Promise<Stash[]>;
 };
 
 const StashContext = createContext<StashContextType | undefined>(undefined);
@@ -30,9 +31,11 @@ export const useStash = (): StashContextType => {
 export const StashProvider = ({ children }: { children: React.ReactNode }) => {
     const [stashes, setStashes] = useState<Stash[]>([]);
 
-    const createStash = async (userEmail: string, stash: Omit<Stash, 'createdAt' | 'updatedAt' | 'isPinned' | 'id'>): Promise<Stash | null> => {
+    const createStash = async (userEmail: string, stash: Omit<Stash, 'id' | 'createdAt' | 'updatedAt' | 'isPinned'>): Promise<Stash | null> => {
         try {
             const now = Timestamp.now();
+
+            // Store main data in Firestore
             const userStashesCollection = collection(db, "stashes", userEmail, "userStashes");
             const docRef = await addDoc(userStashesCollection, {
                 ...stash,
@@ -40,6 +43,18 @@ export const StashProvider = ({ children }: { children: React.ReactNode }) => {
                 updatedAt: now,
                 isPinned: false
             });
+
+            // Call API to store embeddings in MongoDB
+            const response = await fetch('/api/v1/stash', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userEmail, stash: { ...stash, id: docRef.id } }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to store embeddings');
+            }
+
             const newStash: Stash = {
                 ...stash,
                 id: docRef.id,
@@ -47,6 +62,7 @@ export const StashProvider = ({ children }: { children: React.ReactNode }) => {
                 updatedAt: now.toDate().toISOString(),
                 isPinned: false
             };
+
             setStashes(prevStashes => [...prevStashes, newStash]);
             return newStash;
         } catch (error) {
@@ -54,6 +70,7 @@ export const StashProvider = ({ children }: { children: React.ReactNode }) => {
             return null;
         }
     };
+
     const formatDate = (date: Timestamp | string | undefined): string => {
         if (!date) return new Date().toISOString();
         if (date instanceof Timestamp) {
@@ -87,21 +104,29 @@ export const StashProvider = ({ children }: { children: React.ReactNode }) => {
 
     const updateStash = async (userEmail: string, id: string, stashUpdate: Partial<Stash>): Promise<Stash | null> => {
         try {
-            const stashRef = doc(db, "stashes", userEmail, "userStashes", id);
             const now = Timestamp.now();
+            const stashRef = doc(db, "stashes", userEmail, "userStashes", id);
             const updatedFields = { ...stashUpdate, updatedAt: now };
             await updateDoc(stashRef, updatedFields);
-            const updatedStash = stashes.find(stash => stash.id === id);
-            const updatedData = updatedStash
-                ? { ...updatedStash, ...stashUpdate, updatedAt: now.toDate().toISOString() }
-                : null;
 
-            if (updatedData) {
-                setStashes(prevStashes =>
-                    prevStashes.map(stash => stash.id === id ? updatedData : stash)
-                );
+            // Call API to update embeddings in MongoDB
+            if (stashUpdate.desc || stashUpdate.stashSections) {
+                const response = await fetch('/api/v1/stash', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userEmail, id, stashUpdate }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to update embeddings');
+                }
             }
-            return updatedData;
+
+            const updatedStash = { ...stashUpdate, id, updatedAt: now.toDate().toISOString() } as Stash;
+            setStashes(prevStashes =>
+                prevStashes.map(stash => stash.id === id ? { ...stash, ...updatedStash } : stash)
+            );
+            return updatedStash;
         } catch (error) {
             console.error("Error updating stash: ", error);
             return null;
@@ -110,7 +135,18 @@ export const StashProvider = ({ children }: { children: React.ReactNode }) => {
 
     const deleteStash = async (userEmail: string, id: string) => {
         try {
+            // Delete from Firestore
             await deleteDoc(doc(db, "stashes", userEmail, "userStashes", id));
+
+            // Call API to delete from MongoDB
+            const response = await fetch(`/api/v1/stash?userEmail=${userEmail}&id=${id}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete embeddings');
+            }
+
             setStashes(prevStashes => prevStashes.filter(stash => stash.id !== id));
         } catch (error) {
             console.error("Error deleting stash: ", error);
@@ -167,6 +203,20 @@ export const StashProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
+    const handleSearchStashes = async (query: string, userEmail: string) => {
+        try {
+            const response = await fetch(`/api/v1/stash/search?query=${query}&userEmail=${userEmail}`);
+            if (!response.ok) {
+                throw new Error('Failed to search stashes');
+            }
+            const results = await response.json();
+            return results;
+        } catch (error) {
+            console.error("Error searching stashes: ", error);
+            return [];
+        }
+    };
+
     return (
         <StashContext.Provider value={{
             stashes,
@@ -177,7 +227,8 @@ export const StashProvider = ({ children }: { children: React.ReactNode }) => {
             deleteStash,
             togglePinStash,
             addTag,
-            removeTag
+            removeTag,
+            searchStashes: handleSearchStashes,
         }}>
             {children}
         </StashContext.Provider>

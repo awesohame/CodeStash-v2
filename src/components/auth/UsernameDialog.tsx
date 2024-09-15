@@ -18,7 +18,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from '@/lib/utils';
 import { auth, db } from '@/config/firebase';
 import { doc, getDocs, query, collection, where, updateDoc } from 'firebase/firestore';
-import { motion, AnimatePresence } from 'framer-motion';
 
 const usernameSchema = z.object({
     username: z.string().min(3, "Username must be at least 3 characters long").max(20, "Username must be less than 20 characters"),
@@ -81,18 +80,12 @@ const UsernameDialog = ({
     }
 
     return (
-        <AnimatePresence>
+        <>
             {isOpen && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
+                <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
                 >
-                    <motion.div
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0.9, opacity: 0 }}
+                    <div
                         className="bg-dark-3 rounded-lg p-8 w-96 shadow-xl"
                     >
                         <Form {...form}>
@@ -131,10 +124,10 @@ const UsernameDialog = ({
                                 </Button>
                             </form>
                         </Form>
-                    </motion.div>
-                </motion.div>
+                    </div>
+                </div>
             )}
-        </AnimatePresence>
+        </>
     );
 };
 

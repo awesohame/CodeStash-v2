@@ -1,19 +1,24 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useStash } from '@/context/StashContext'
-import { PlusCircle, Code, FileText, Clock, Tag, Trash2, Pin } from 'lucide-react'
+import { PlusCircle, Code, FileText, Clock, Tag, Trash2, Pin, Search } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { useAuth } from '@/context/AuthContext'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import Masonry from 'react-masonry-css'
+import { Stash } from '@/constants/types'
 
 export default function StashGrid() {
     const router = useRouter()
-    const { stashes, createStash, readStashes, deleteStash, togglePinStash } = useStash()
+    const { stashes, createStash, readStashes, deleteStash, togglePinStash, searchStashes } = useStash()
     const { user, username } = useAuth()
+    const [searchQuery, setSearchQuery] = useState('')
+    const [searchResults, setSearchResults] = useState<Stash[]>([])
+    const [isSearching, setIsSearching] = useState(false)
 
     useEffect(() => {
         if (user && user.email) {
@@ -52,6 +57,23 @@ export default function StashGrid() {
         }
     }
 
+    const handleSearch = async () => {
+        if (user?.email && searchQuery.trim()) {
+            setIsSearching(true)
+            try {
+                const results = await searchStashes(searchQuery, user.email)
+                setSearchResults(results)
+            } catch (error) {
+                console.error('Error searching stashes:', error)
+                setSearchResults([])
+            } finally {
+                setIsSearching(false)
+            }
+        } else {
+            setSearchResults([])
+        }
+    }
+
     const pinnedStashes = stashes.filter(stash => stash.isPinned)
     const normalStashes = stashes.filter(stash => !stash.isPinned)
 
@@ -61,7 +83,7 @@ export default function StashGrid() {
         700: 1
     }
 
-    const renderStashCard = (stash: any) => (
+    const renderStashCard = (stash: Stash) => (
         <div key={stash.id} className="relative group mb-6">
             <Link href={`/${username}/${stash.id}`} className="block">
                 <Card
@@ -126,38 +148,66 @@ export default function StashGrid() {
 
     return (
         <div className="space-y-8">
-            {pinnedStashes.length > 0 && (
+            <div className="flex items-center space-x-4 mb-8">
+                <Input
+                    type="text"
+                    placeholder="Search stashes..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-grow"
+                />
+                <Button onClick={handleSearch} disabled={isSearching}>
+                    {isSearching ? 'Searching...' : 'Search'}
+                </Button>
+            </div>
+
+            {searchResults.length > 0 ? (
                 <div>
-                    <h2 className="text-2xl font-bold text-light-1 mb-4">Pinned Stashes</h2>
+                    <h2 className="text-2xl font-bold text-light-1 mb-4">Search Results</h2>
                     <Masonry
                         breakpointCols={breakpointColumnsObj}
                         className="flex w-auto -ml-6"
                         columnClassName="pl-6 bg-clip-padding"
                     >
-                        {pinnedStashes.map(renderStashCard)}
+                        {searchResults.map(renderStashCard)}
                     </Masonry>
                 </div>
-            )}
-
-            <div>
-                <h2 className="text-2xl font-bold text-light-1 mb-4">All Stashes</h2>
-                <Masonry
-                    breakpointCols={breakpointColumnsObj}
-                    className="flex w-auto -ml-6"
-                    columnClassName="pl-6 bg-clip-padding"
-                >
-                    <div
-                        className="bg-dark-3 border border-dark-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer mb-6"
-                        onClick={handleCreateNewStash}
-                    >
-                        <div className="flex flex-col items-center justify-center h-full p-8">
-                            <PlusCircle className="w-16 h-16 text-light-3 mb-4" />
-                            <p className="text-light-2 text-lg font-semibold">Create New Stash</p>
+            ) : (
+                <>
+                    {pinnedStashes.length > 0 && (
+                        <div>
+                            <h2 className="text-2xl font-bold text-light-1 mb-4">Pinned Stashes</h2>
+                            <Masonry
+                                breakpointCols={breakpointColumnsObj}
+                                className="flex w-auto -ml-6"
+                                columnClassName="pl-6 bg-clip-padding"
+                            >
+                                {pinnedStashes.map(renderStashCard)}
+                            </Masonry>
                         </div>
+                    )}
+
+                    <div>
+                        <h2 className="text-2xl font-bold text-light-1 mb-4">All Stashes</h2>
+                        <Masonry
+                            breakpointCols={breakpointColumnsObj}
+                            className="flex w-auto -ml-6"
+                            columnClassName="pl-6 bg-clip-padding"
+                        >
+                            <div
+                                className="bg-dark-3 border border-dark-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer mb-6"
+                                onClick={handleCreateNewStash}
+                            >
+                                <div className="flex flex-col items-center justify-center h-full p-8">
+                                    <PlusCircle className="w-16 h-16 text-light-3 mb-4" />
+                                    <p className="text-light-2 text-lg font-semibold">Create New Stash</p>
+                                </div>
+                            </div>
+                            {normalStashes.map(renderStashCard)}
+                        </Masonry>
                     </div>
-                    {normalStashes.map(renderStashCard)}
-                </Masonry>
-            </div>
+                </>
+            )}
         </div>
     )
 }
