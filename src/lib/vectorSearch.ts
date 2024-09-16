@@ -32,40 +32,16 @@ export async function searchStashes(query: string, userEmail: string): Promise<S
 
     const results = await embeddingsCollection.aggregate([
       {
-        $search: {
-          index: 'default',
-          compound: {
-            should: [
-              {
-                knnBeta: {
-                  vector: queryEmbedding,
-                  path: 'descEmbedding',
-                  k: 10
-                }
-              },
-              {
-                knnBeta: {
-                  vector: queryEmbedding,
-                  path: 'sectionEmbeddings',
-                  k: 10
-                }
-              },
-              {
-                text: {
-                  query: query,
-                  path: ['title', 'desc'],
-                  fuzzy: {}
-                }
-              }
-            ]
-          }
+        "$vectorSearch": {
+          "index": "vsearch_index",
+          "path": "descEmbedding",
+          "queryVector": queryEmbedding,
+          "numCandidates": 100,
+          "limit": 1
         }
       },
       {
         $match: { userEmail }
-      },
-      {
-        $limit: 20
       },
       {
         $project: {

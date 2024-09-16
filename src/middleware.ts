@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import axios from "axios"
 
-import { initAdmin } from "./config/firebaseAdmin"
-import { getFirestore } from "firebase-admin/firestore"
-
 export function middleware(req: NextRequest) {
     if (req.nextUrl.pathname === '/') {
         return NextResponse.next()

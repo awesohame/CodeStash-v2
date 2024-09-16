@@ -9,16 +9,18 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { useAuth } from '@/context/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
 import Masonry from 'react-masonry-css'
 import { Stash } from '@/constants/types'
 
-export default function StashGrid() {
+export default function Component() {
     const router = useRouter()
     const { stashes, createStash, readStashes, deleteStash, togglePinStash, searchStashes } = useStash()
     const { user, username } = useAuth()
     const [searchQuery, setSearchQuery] = useState('')
     const [searchResults, setSearchResults] = useState<Stash[]>([])
     const [isSearching, setIsSearching] = useState(false)
+    const [isAdvancedSearch, setIsAdvancedSearch] = useState(false)
 
     useEffect(() => {
         if (user && user.email) {
@@ -61,8 +63,16 @@ export default function StashGrid() {
         if (user?.email && searchQuery.trim()) {
             setIsSearching(true)
             try {
-                const results = await searchStashes(searchQuery, user.email)
-                setSearchResults(results)
+                if (isAdvancedSearch) {
+                    const results = await searchStashes(searchQuery, user.email)
+                    setSearchResults(results)
+                } else {
+                    const results = stashes.filter(stash =>
+                        stash.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        stash.desc.toLowerCase().includes(searchQuery.toLowerCase())
+                    )
+                    setSearchResults(results)
+                }
             } catch (error) {
                 console.error('Error searching stashes:', error)
                 setSearchResults([])
@@ -72,6 +82,11 @@ export default function StashGrid() {
         } else {
             setSearchResults([])
         }
+    }
+
+    const handleViewAllStashes = () => {
+        setSearchResults([])
+        setSearchQuery('')
     }
 
     const pinnedStashes = stashes.filter(stash => stash.isPinned)
@@ -84,7 +99,7 @@ export default function StashGrid() {
     }
 
     const renderStashCard = (stash: Stash) => (
-        <div key={stash.id} className="relative group mb-6">
+        <div key={stash.id} className="mb-6 w-full">
             <Link href={`/${username}/${stash.id}`} className="block">
                 <Card
                     className={`bg-dark-3 border ${stash.isPinned ? 'border-yellow-500' : 'border-dark-4'} shadow-lg transition-all duration-300 h-full`}
@@ -148,17 +163,45 @@ export default function StashGrid() {
 
     return (
         <div className="space-y-8">
-            <div className="flex items-center space-x-4 mb-8">
-                <Input
-                    type="text"
-                    placeholder="Search stashes..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex-grow"
-                />
-                <Button onClick={handleSearch} disabled={isSearching}>
-                    {isSearching ? 'Searching...' : 'Search'}
-                </Button>
+            <div className="flex flex-wrap items-center gap-4 mb-8">
+                <div className="flex-grow flex items-center gap-4">
+                    <Input
+                        type="text"
+                        placeholder="Search stashes..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="flex-grow bg-dark-2 border-dark-4 text-light-1 placeholder-light-4"
+                    />
+                    <Button
+                        onClick={handleSearch}
+                        disabled={isSearching}
+                        className="bg-dark-4 hover:bg-dark-5 text-light-1"
+                    >
+                        {isSearching ? 'Searching...' : <Search className="w-4 h-4" />}
+                    </Button>
+                    <div className="flex items-center space-x-2">
+                        <span className="text-light-2 text-sm">Advanced</span>
+                        <Switch
+                            checked={isAdvancedSearch}
+                            onCheckedChange={setIsAdvancedSearch}
+                            className="data-[state=checked]:bg-dark-5 data-[state=unchecked]:bg-dark-3"
+                        >
+                            <span className="sr-only">Advanced search</span>
+                            <span
+                                className={`${isAdvancedSearch ? 'translate-x-5' : 'translate-x-0'
+                                    } inline-block h-4 w-4 transform rounded-full bg-light-1 transition`}
+                            />
+                        </Switch>
+                    </div>
+                </div>
+                {searchResults.length > 0 && (
+                    <Button
+                        onClick={handleViewAllStashes}
+                        className="bg-mono-4 hover:bg-mono-3 text-light-1"
+                    >
+                        View All Stashes
+                    </Button>
+                )}
             </div>
 
             {searchResults.length > 0 ? (
@@ -169,6 +212,15 @@ export default function StashGrid() {
                         className="flex w-auto -ml-6"
                         columnClassName="pl-6 bg-clip-padding"
                     >
+                        <div
+                            className="bg-dark-3 border border-dark-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer mb-6 w-full h-[200px]"
+                            onClick={handleCreateNewStash}
+                        >
+                            <div className="flex flex-col items-center justify-center h-full p-8">
+                                <PlusCircle className="w-16 h-16 text-light-3 mb-4" />
+                                <p className="text-light-2 text-lg font-semibold">Create New Stash</p>
+                            </div>
+                        </div>
                         {searchResults.map(renderStashCard)}
                     </Masonry>
                 </div>
@@ -195,7 +247,7 @@ export default function StashGrid() {
                             columnClassName="pl-6 bg-clip-padding"
                         >
                             <div
-                                className="bg-dark-3 border border-dark-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer mb-6"
+                                className="bg-dark-3 border border-dark-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer mb-6 w-full h-[200px]"
                                 onClick={handleCreateNewStash}
                             >
                                 <div className="flex flex-col items-center justify-center h-full p-8">
