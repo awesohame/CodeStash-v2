@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { Button } from './ui/button'
-import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
 import {
     Form,
     FormControl,
@@ -30,17 +30,11 @@ const editQuicklinkSchema = z.object({
         ).optional(),
 });
 
-const EditQuicklinkForm = (
-    {
-        title,
-        url,
-        icon
-    }: {
-        title: string,
-        url: string,
-        icon?: string
-    }
-) => {
+const EditQuicklinkForm: React.FC<{
+    title: string,
+    url: string,
+    icon?: string
+}> = ({ title, url, icon }) => {
     const { updateQuickLink } = useSidebar();
     const [iconPreview, setIconPreview] = useState<string | null>(icon || null);
 
@@ -80,61 +74,63 @@ const EditQuicklinkForm = (
     };
 
     return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-6 pt-2">
-                <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel className='text-light-1 text-lg'>Title</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Enter name for quicklink" aria-label="Title" {...field} />
-                            </FormControl>
-                            <FormMessage className='font-medium' />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name='url'
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel className='text-light-1 text-lg'>URL</FormLabel>
-                            <FormControl>
-                                <Input type='url' placeholder="Enter URL with https://" aria-label="URL" {...field} />
-                            </FormControl>
-                            <FormMessage className='font-medium' />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="icon"
-                    render={({ field: { onChange, value, ...field } }) => (
-                        <FormItem>
-                            <FormLabel className='text-light-1 text-lg'>Icon</FormLabel>
-                            <FormControl>
-                                <Input
-                                    type="file"
-                                    accept={ACCEPTED_IMAGE_TYPES.join(',')}
-                                    onChange={(e) => {
-                                        onChange(e.target.files);
-                                        handleIconChange(e);
-                                    }}
-                                    {...field}
-                                />
-                            </FormControl>
-                            {iconPreview && (
-                                <img src={iconPreview} alt="Icon preview" className="mt-2 w-10 h-10 object-cover" />
-                            )}
-                            <FormMessage className='font-medium' />
-                        </FormItem>
-                    )}
-                />
-                <Button type='submit' className="w-full bg-dark-1 hover:bg-dark-0">Update Quicklink</Button>
-            </form>
-        </Form>
+        <div className="px-6 pt-2">
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                        control={form.control}
+                        name="title"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className='text-light-1 text-lg'>Title</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Enter name for quicklink" aria-label="Title" {...field} />
+                                </FormControl>
+                                <FormMessage className='font-medium' />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name='url'
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className='text-light-1 text-lg'>URL</FormLabel>
+                                <FormControl>
+                                    <Input type='url' placeholder="Enter URL with https://" aria-label="URL" {...field} />
+                                </FormControl>
+                                <FormMessage className='font-medium' />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="icon"
+                        render={({ field: { onChange, value, ...field } }) => (
+                            <FormItem>
+                                <FormLabel className='text-light-1 text-lg'>Icon</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="file"
+                                        accept={ACCEPTED_IMAGE_TYPES.join(',')}
+                                        onChange={(e) => {
+                                            onChange(e.target.files);
+                                            handleIconChange(e);
+                                        }}
+                                        {...field}
+                                    />
+                                </FormControl>
+                                {iconPreview && (
+                                    <img src={iconPreview} alt="Icon preview" className="mt-2 w-10 h-10 object-cover" />
+                                )}
+                                <FormMessage className='font-medium' />
+                            </FormItem>
+                        )}
+                    />
+                    <Button type='submit' className="w-full bg-dark-1 hover:bg-dark-0">Update Quicklink</Button>
+                </form>
+            </Form>
+        </div>
     )
 }
 

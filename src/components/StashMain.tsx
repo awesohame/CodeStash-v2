@@ -31,10 +31,11 @@ export default function StashMain() {
             await readStashes(user.email)
             setIsLoading(false)
         }
-    }, [user, readStashes])
+    }, [user])
 
     useEffect(() => {
         fetchStashes()
+        console.log('fetching stashes')
     }, [fetchStashes])
 
     useEffect(() => {
@@ -45,6 +46,7 @@ export default function StashMain() {
                 setEditedStash(foundStash ? { ...foundStash } : null)
             }
         }
+        console.log('check stash edits')
     }, [stashes, stashId, isLoading, isEditing])
 
     const handleEdit = useCallback(() => {
@@ -58,12 +60,13 @@ export default function StashMain() {
                 await updateStash(user.email, stashId[0] as string, editedStash)
                 setIsEditing(false)
                 setCurrentStash(editedStash)
+                console.log('fetching stashes in handleSave')
                 await fetchStashes()
             } catch (error) {
                 console.error('Error updating stash:', error)
             }
         }
-    }, [editedStash, user?.email, stashId, updateStash, fetchStashes])
+    }, [editedStash, user?.email, stashId, updateStash])
 
     const handleCancel = useCallback(() => {
         setIsEditing(false)

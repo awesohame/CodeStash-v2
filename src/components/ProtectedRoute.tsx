@@ -14,11 +14,11 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     const router = useRouter();
 
     useEffect(() => {
-        // console.log(user);
+        console.log("protected route");
         if (!user) {
             router.push("/");
         }
-    }, [user, router]);
+    }, [user]);
 
     if (!user) {
         return <Loader />;

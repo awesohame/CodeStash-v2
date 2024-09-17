@@ -40,26 +40,26 @@ const QuickLinkActions = (
 
     return (
         <div className='flex flex-col gap-2'>
-            <Button className='text-light-1 bg-dark-3 hover:bg-dark-4'>
-                <div className='flex justify-center items-center gap-2'>
-                    <MdEdit className='text-xl' />
-                    <Dialog>
-                        <DialogTrigger>
+            <Dialog>
+                <DialogTrigger asChild>
+                    <Button className='text-light-1 bg-dark-3 hover:bg-dark-4 w-full'>
+                        <div className='flex justify-center items-center gap-2'>
+                            <MdEdit className='text-xl' />
                             <span>Edit</span>
-                        </DialogTrigger>
-                        <DialogContent
-                            className='bg-dark-4 border-none rounded-xl'
-                        >
-                            <DialogHeader>
-                                <DialogTitle className='text-dark-1 text-3xl'>Edit Quicklink</DialogTitle>
-                                <DialogDescription>
-                                    <EditQuicklinkForm title={title} url={url} icon={icon} />
-                                </DialogDescription>
-                            </DialogHeader>
-                        </DialogContent>
-                    </Dialog>
-                </div>
-            </Button>
+                        </div>
+                    </Button>
+                </DialogTrigger>
+                <DialogContent
+                    className='bg-dark-4 border-none rounded-xl'
+                >
+                    <DialogHeader>
+                        <DialogTitle className='text-dark-1 text-3xl'>Edit Quicklink</DialogTitle>
+                        <DialogDescription>
+                            <EditQuicklinkForm title={title} url={url} icon={icon} />
+                        </DialogDescription>
+                    </DialogHeader>
+                </DialogContent>
+            </Dialog>
             <Button className='text-light-1 bg-red-600 hover:bg-red-700' onClick={handleDelete}>
                 <div className='flex justify-center items-center gap-2'>
                     <MdDeleteForever className='text-xl' />

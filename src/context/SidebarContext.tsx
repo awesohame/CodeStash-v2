@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { db, auth, storage } from '@/config/firebase';
 import { getDoc, doc, setDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -12,6 +12,7 @@ type SidebarContextType = {
     addQuickLink: (newQuickLink: QuickLink, iconFile?: File) => Promise<void>;
     removeQuickLink: (url: string) => Promise<void>;
     updateQuickLink: (oldUrl: string, updatedQuickLink: QuickLink, iconFile?: File) => Promise<void>;
+    refreshQuickLinks: () => Promise<void>;
 };
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
@@ -31,26 +32,32 @@ type SidebarProviderProps = {
 export const SidebarProvider = ({ children }: SidebarProviderProps) => {
     const [quickLinks, setQuickLinks] = useState<QuickLink[]>([]);
 
-    useEffect(() => {
-        const fetchQuickLinks = async () => {
-            const user = auth.currentUser;
-            if (!user) {
-                console.error('User not logged in');
-                return;
-            }
-            const email = user.email;
-            const quickLinkRef = doc(db, 'quickLinks', email as string);
-            const quickLinkDoc = await getDoc(quickLinkRef);
-            if (quickLinkDoc.exists()) {
-                const quickLinksData = quickLinkDoc.data().quickLinks ?? [];
-                setQuickLinks(quickLinksData);
-            } else {
-                console.log('No quicklinks found');
-            }
-        };
-
-        fetchQuickLinks();
+    const fetchQuickLinks = useCallback(async () => {
+        const user = auth.currentUser;
+        if (!user) {
+            console.error('User not logged in');
+            return;
+        }
+        const email = user.email;
+        const quickLinkRef = doc(db, 'quickLinks', email as string);
+        const quickLinkDoc = await getDoc(quickLinkRef);
+        if (quickLinkDoc.exists()) {
+            const quickLinksData = quickLinkDoc.data().quickLinks ?? [];
+            setQuickLinks(quickLinksData);
+            console.log('quicklinks fetched');
+        } else {
+            console.log('No quicklinks found');
+        }
     }, []);
+
+    useEffect(() => {
+        fetchQuickLinks();
+        console.log('sidebar context');
+    }, [fetchQuickLinks]);
+
+    const refreshQuickLinks = useCallback(async () => {
+        await fetchQuickLinks();
+    }, [fetchQuickLinks]);
 
     const updateFirestore = async (newQuickLinks: QuickLink[]) => {
         const user = auth.currentUser;
@@ -101,7 +108,14 @@ export const SidebarProvider = ({ children }: SidebarProviderProps) => {
     };
 
     return (
-        <SidebarContext.Provider value={{ quickLinks, setQuickLinks, addQuickLink, removeQuickLink, updateQuickLink }}>
+        <SidebarContext.Provider value={{
+            quickLinks,
+            setQuickLinks,
+            addQuickLink,
+            removeQuickLink,
+            updateQuickLink,
+            refreshQuickLinks
+        }}>
             {children}
         </SidebarContext.Provider>
     );

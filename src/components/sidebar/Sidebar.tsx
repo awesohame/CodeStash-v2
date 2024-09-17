@@ -1,9 +1,10 @@
 "use client";
 
-import React from 'react'
+import React, { useState } from 'react'
 import { FaPlus } from "react-icons/fa6";
 import { Button } from '../ui/button';
 import { FiMoreVertical } from "react-icons/fi";
+import { RefreshCw } from "lucide-react";
 import {
     Tooltip,
     TooltipContent,
@@ -33,7 +34,14 @@ import Image from 'next/image';
 
 const Sidebar = () => {
     const { user } = useAuth();
-    const { quickLinks } = useSidebar();
+    const { quickLinks, refreshQuickLinks } = useSidebar();
+    const [isRefreshing, setIsRefreshing] = useState(false);
+
+    const handleRefresh = async () => {
+        setIsRefreshing(true);
+        await refreshQuickLinks();
+        setIsRefreshing(false);
+    };
 
     return (
         <div className='w-[300px] h-screen flex flex-col bg-dark-1 bg-opacity-80 backdrop-blur-lg'>
@@ -44,31 +52,49 @@ const Sidebar = () => {
                 <div className='px-4 py-4'>
                     <div className='text-xl text-light-1 flex justify-between items-center mb-4'>
                         <span className='font-semibold'>Quick Links</span>
+                        <div className='flex items-center'>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            onClick={handleRefresh}
+                                            disabled={isRefreshing}
+                                            className='mr-2 rounded-full hover:bg-dark-4 text-light-2 hover:text-light-1 p-2 h-auto bg-transparent cursor-pointer transition-colors duration-200'
+                                        >
+                                            <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent className='bg-light-1 text-dark-0 border-none'>
+                                        <span>Refresh Quick Links</span>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
 
-                        <Dialog>
-                            <DialogTrigger>
-                                <TooltipProvider>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <div className='rounded-full hover:bg-dark-4 text-light-2 hover:text-light-1 p-2 h-auto bg-transparent cursor-pointer transition-colors duration-200'>
-                                                <FaPlus className='text-xl' />
-                                            </div>
-                                        </TooltipTrigger>
-                                        <TooltipContent className='bg-light-1 text-dark-0 border-none'>
-                                            <span>Add a Quick Link</span>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
-                            </DialogTrigger>
-                            <DialogContent className='bg-dark-3 border-none rounded-xl'>
-                                <DialogHeader>
-                                    <DialogTitle className='text-light-1 text-2xl font-semibold'>Create Quicklink</DialogTitle>
-                                    <DialogDescription>
-                                        <QuickLinkForm />
-                                    </DialogDescription>
-                                </DialogHeader>
-                            </DialogContent>
-                        </Dialog>
+                            <Dialog>
+                                <DialogTrigger>
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <div className='rounded-full hover:bg-dark-4 text-light-2 hover:text-light-1 p-2 h-auto bg-transparent cursor-pointer transition-colors duration-200'>
+                                                    <FaPlus className='text-xl' />
+                                                </div>
+                                            </TooltipTrigger>
+                                            <TooltipContent className='bg-light-1 text-dark-0 border-none'>
+                                                <span>Add a Quick Link</span>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                </DialogTrigger>
+                                <DialogContent className='bg-dark-3 border-none rounded-xl'>
+                                    <DialogHeader>
+                                        <DialogTitle className='text-light-1 text-2xl font-semibold'>Create Quicklink</DialogTitle>
+                                        <DialogDescription>
+                                            <QuickLinkForm />
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                </DialogContent>
+                            </Dialog>
+                        </div>
                     </div>
                 </div>
 

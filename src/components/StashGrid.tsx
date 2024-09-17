@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useStash } from '@/context/StashContext'
-import { PlusCircle, Code, FileText, Clock, Tag, Trash2, Pin, Search } from 'lucide-react'
+import { PlusCircle, Code, FileText, Clock, Tag, Trash2, Pin, Search, RefreshCw } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { useAuth } from '@/context/AuthContext'
 import { Button } from '@/components/ui/button'
@@ -21,12 +21,23 @@ export default function Component() {
     const [searchResults, setSearchResults] = useState<Stash[]>([])
     const [isSearching, setIsSearching] = useState(false)
     const [isAdvancedSearch, setIsAdvancedSearch] = useState(false)
+    const [isRefreshing, setIsRefreshing] = useState(false)
 
     useEffect(() => {
         if (user && user.email) {
             readStashes(user.email)
+            console.log('Reading stashes...')
         }
-    }, [user, readStashes])
+    }, []) // dont put readStashes and user in the dependency array as it will cause infinite loop
+
+    const handleRefresh = async () => {
+        if (user && user.email) {
+            setIsRefreshing(true)
+            await readStashes(user.email)
+            setIsRefreshing(false)
+            console.log('Stashes refreshed')
+        }
+    }
 
     const handleCreateNewStash = async () => {
         if (user?.email) {
@@ -99,7 +110,7 @@ export default function Component() {
     }
 
     const renderStashCard = (stash: Stash) => (
-        <div key={stash.id} className="mb-6 w-full">
+        <div key={stash.id} className="mb-6 w-full relative group">
             <Link href={`/${username}/${stash.id}`} className="block">
                 <Card
                     className={`bg-dark-3 border ${stash.isPinned ? 'border-yellow-500' : 'border-dark-4'} shadow-lg transition-all duration-300 h-full`}
@@ -228,7 +239,16 @@ export default function Component() {
                 <>
                     {pinnedStashes.length > 0 && (
                         <div>
-                            <h2 className="text-2xl font-bold text-light-1 mb-4">Pinned Stashes</h2>
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-2xl font-bold text-light-1">Pinned Stashes</h2>
+                                <Button
+                                    onClick={handleRefresh}
+                                    disabled={isRefreshing}
+                                    className="bg-dark-4 hover:bg-dark-5 text-light-1"
+                                >
+                                    {isRefreshing ? 'Refreshing...' : <RefreshCw className="w-4 h-4" />}
+                                </Button>
+                            </div>
                             <Masonry
                                 breakpointCols={breakpointColumnsObj}
                                 className="flex w-auto -ml-6"
@@ -240,7 +260,18 @@ export default function Component() {
                     )}
 
                     <div>
-                        <h2 className="text-2xl font-bold text-light-1 mb-4">All Stashes</h2>
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-2xl font-bold text-light-1">All Stashes</h2>
+                            {!pinnedStashes.length && (
+                                <Button
+                                    onClick={handleRefresh}
+                                    disabled={isRefreshing}
+                                    className="bg-dark-4 hover:bg-dark-5 text-light-1"
+                                >
+                                    {isRefreshing ? 'Refreshing...' : <RefreshCw className="w-4 h-4" />}
+                                </Button>
+                            )}
+                        </div>
                         <Masonry
                             breakpointCols={breakpointColumnsObj}
                             className="flex w-auto -ml-6"
