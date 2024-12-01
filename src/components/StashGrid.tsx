@@ -6,6 +6,17 @@ import { useRouter } from 'next/navigation'
 import { useStash } from '@/context/StashContext'
 import { PlusCircle, Code, FileText, Clock, Tag, Trash2, Pin, Search, RefreshCw } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger
+} from '@/components/ui/accordion'
+import {
+    RadioGroup,
+    RadioGroupItem
+} from '@/components/ui/radio-group'
+import { Label } from '@/components/ui/label'
 import { useAuth } from '@/context/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,6 +33,7 @@ export default function Component() {
     const [isSearching, setIsSearching] = useState(false)
     const [isAdvancedSearch, setIsAdvancedSearch] = useState(false)
     const [isRefreshing, setIsRefreshing] = useState(false)
+    const [searchIndex, setSearchIndex] = useState<'desc' | 'sections'>('desc')
 
     useEffect(() => {
         if (user && user.email) {
@@ -75,7 +87,7 @@ export default function Component() {
             setIsSearching(true)
             try {
                 if (isAdvancedSearch) {
-                    const results = await searchStashes(searchQuery, user.email)
+                    const results = await searchStashes(searchQuery, user.email, searchIndex)
                     setSearchResults(results)
                 } else {
                     const results = stashes.filter(stash =>
@@ -174,8 +186,8 @@ export default function Component() {
 
     return (
         <div className="space-y-8">
-            <div className="flex flex-wrap items-center gap-4 mb-8">
-                <div className="flex-grow flex items-center gap-4">
+            <div className="flex flex-col gap-4 mb-8">
+                <div className="flex items-center gap-4">
                     <Input
                         type="text"
                         placeholder="Search stashes..."
@@ -204,14 +216,56 @@ export default function Component() {
                             />
                         </Switch>
                     </div>
+                    {searchResults.length > 0 && (
+                        <Button
+                            onClick={handleViewAllStashes}
+                            className="bg-dark-4 hover:bg-dark-5 text-light-1"
+                        >
+                            View All Stashes
+                        </Button>
+                    )}
                 </div>
-                {searchResults.length > 0 && (
-                    <Button
-                        onClick={handleViewAllStashes}
-                        className="bg-mono-4 hover:bg-mono-3 text-light-1"
+
+                {isAdvancedSearch && (
+                    <Accordion
+                        type="single"
+                        collapsible
+                        defaultValue="advanced-options"
+                        className="w-full"
                     >
-                        View All Stashes
-                    </Button>
+                        <AccordionItem value="advanced-options" className="border-none">
+                            <AccordionTrigger className="text-light-2 hover:no-underline">
+                                Advanced Search Options
+                            </AccordionTrigger>
+                            <AccordionContent>
+                                <div className="bg-dark-3 p-4 rounded-lg">
+                                    <div className="space-y-4">
+                                        <div>
+                                            <Label className="text-light-2">Search In</Label>
+                                            <RadioGroup
+                                                defaultValue="desc"
+                                                onValueChange={(value: 'desc' | 'sections') => setSearchIndex(value)}
+                                                className="mt-2 space-y-2"
+                                            >
+                                                <div className="flex items-center space-x-2">
+                                                    <RadioGroupItem value="desc" id="desc" />
+                                                    <Label htmlFor="desc" className="text-light-3">
+                                                        Description
+                                                    </Label>
+                                                </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <RadioGroupItem value="sections" id="sections" />
+                                                    <Label htmlFor="sections" className="text-light-3">
+                                                        Stash Contents
+                                                    </Label>
+                                                </div>
+                                            </RadioGroup>
+                                        </div>
+                                    </div>
+                                </div>
+                            </AccordionContent>
+                        </AccordionItem>
+                    </Accordion>
                 )}
             </div>
 

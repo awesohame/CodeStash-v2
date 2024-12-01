@@ -14,10 +14,12 @@ export async function getEmbedding(text: string): Promise<number[]> {
     return Array.from(embedding.values);
 }
 
-export async function searchStashes(query: string, userEmail: string): Promise<Stash[]> {
-  const cacheKey = `search:${userEmail}:${query}`;
-  
-  try {
+export async function searchStashes(
+  query: string, 
+  userEmail: string, 
+  searchIndex: string = 'desc'
+): Promise<Stash[]> {
+  const cacheKey = `search:${userEmail}:${query}:${searchIndex}`;
     // Commented out Redis caching for now
     // const redis = await getRedisClient();
     // const cachedResults = await redis.get(cacheKey);
@@ -25,19 +27,26 @@ export async function searchStashes(query: string, userEmail: string): Promise<S
     //   return JSON.parse(cachedResults);
     // }
 
+  
+  try {
     const mongoDb = await connectToDatabase();
     const embeddingsCollection = mongoDb.collection('stashEmbeddings');
 
     const queryEmbedding = await getEmbedding(query);
 
+    // Determine which index to use based on searchIndex
+    const indexPath = searchIndex === 'sections' 
+      ? 'sectionsEmbedding' 
+      : 'descEmbedding';
+
     const results = await embeddingsCollection.aggregate([
       {
         "$vectorSearch": {
-          "index": "vsearch_index",
-          "path": "descEmbedding",
+          "index": "stash_vsearch_index",
+          "path": indexPath,
           "queryVector": queryEmbedding,
           "numCandidates": 100,
-          "limit": 1
+          "limit": 5
         }
       },
       {
@@ -63,11 +72,9 @@ export async function searchStashes(query: string, userEmail: string): Promise<S
       id: doc.id
     } as Stash));
 
-    // Sort stashes based on the order of results from MongoDB
+    // sort stashes based on the order of results from MongoDB
     const sortedStashes = stashIds.map(id => stashes.find(stash => stash.id === id)).filter(Boolean) as Stash[];
 
-    // Commented out Redis caching for now
-    // await redis.set(cacheKey, JSON.stringify(sortedStashes), 'EX', 3600);
     return sortedStashes;
   } catch (error) {
     console.error('Error in searchStashes:', error);

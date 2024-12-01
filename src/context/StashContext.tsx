@@ -15,7 +15,7 @@ type StashContextType = {
     togglePinStash: (userEmail: string, id: string) => Promise<void>;
     addTag: (userEmail: string, id: string, tag: string) => Promise<void>;
     removeTag: (userEmail: string, id: string, tag: string) => Promise<void>;
-    searchStashes: (query: string, userEmail: string) => Promise<Stash[]>;
+    searchStashes: (query: string, userEmail: string, searchIndex?: 'desc' | 'sections') => Promise<Stash[]>;
 };
 
 const StashContext = createContext<StashContextType | undefined>(undefined);
@@ -203,9 +203,9 @@ export const StashProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
-    const handleSearchStashes = async (query: string, userEmail: string) => {
+    const handleSearchStashes = async (query: string, userEmail: string, searchIndex?: 'desc' | 'sections') => {
         try {
-            const response = await fetch(`/api/v1/stash/search?query=${query}&userEmail=${userEmail}`);
+            const response = await fetch(`/api/v1/stash/search?query=${query}&userEmail=${userEmail}&searchIndex=${searchIndex || 'desc'}`);
             if (!response.ok) {
                 throw new Error('Failed to search stashes');
             }

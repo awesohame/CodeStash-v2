@@ -10,17 +10,25 @@ export async function POST(req: NextRequest) {
     const embeddingsCollection = mongoDb.collection('stashEmbeddings');
 
     const descEmbedding = await getEmbedding(stash.desc);
-    const sectionEmbeddings = await Promise.all(stash.stashSections.map((section: StashSection) => getEmbedding(section.content)));
+    
+    // Combine all section contents into a single string
+    const allSectionsContent = stash.stashSections
+      .map((section: StashSection) => section.content)
+      .join(' ');
+
+    // Create a single embedding for all sections
+    const sectionsEmbedding = await getEmbedding(allSectionsContent);
 
     await embeddingsCollection.insertOne({
       stashId: stash.id,
       userEmail,
       descEmbedding,
-      sectionEmbeddings
+      sectionsEmbedding
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error('Error creating stash embeddings:', error);
     return NextResponse.json({ success: false, error: 'Error creating stash' }, { status: 500 });
   }
 }
@@ -35,14 +43,22 @@ export async function PUT(req: NextRequest) {
     if (stashUpdate.desc) {
       updateObj.descEmbedding = await getEmbedding(stashUpdate.desc);
     }
+    
     if (stashUpdate.stashSections) {
-      updateObj.sectionEmbeddings = await Promise.all(stashUpdate.stashSections.map((section: StashSection) => getEmbedding(section.content)));
+      // Combine all section contents into a single string
+      const allSectionsContent = stashUpdate.stashSections
+        .map((section: StashSection) => section.content)
+        .join(' ');
+
+      // Create a single embedding for all sections
+      updateObj.sectionsEmbedding = await getEmbedding(allSectionsContent);
     }
 
     await embeddingsCollection.updateOne({ stashId: id, userEmail }, { $set: updateObj });
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error('Error updating stash embeddings:', error);
     return NextResponse.json({ success: false, error: 'Error updating stash' }, { status: 500 });
   }
 }
@@ -59,6 +75,7 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error('Error deleting stash embeddings:', error);
     return NextResponse.json({ success: false, error: 'Error deleting stash' }, { status: 500 });
   }
 }

@@ -60,7 +60,6 @@ export default function StashMain() {
                 await updateStash(user.email, stashId[0] as string, editedStash)
                 setIsEditing(false)
                 setCurrentStash(editedStash)
-                console.log('fetching stashes in handleSave')
                 await fetchStashes()
             } catch (error) {
                 console.error('Error updating stash:', error)
