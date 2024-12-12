@@ -1,16 +1,40 @@
 import { NextResponse } from "next/server";
-import { getLogos } from 'favicons-scraper'
+import { getLogos } from 'favicons-scraper';
+import fetch from 'node-fetch';
 
 export async function POST(req: Request) {
     try {
-        // TODO - replace third party API with a custom implementation / custom user icon
         const { url } = await req.json();
-        const favicon = await getLogos(url);
-        // console.log(favicon[0]?.src);
-        // favicon.map((f) => console.log(f.type));
-        return new NextResponse(favicon[0]?.src, { status: 200 });
+        const favicons = await getLogos(url);
+        
+        // Prefer .ico or smallest icon
+        const preferredFavicon = favicons.find(f => f.type === 'ico') || favicons[0];
+        
+        if (!preferredFavicon) {
+            return new NextResponse('', { status: 404 });
+        }
+
+        const faviconResponse = await fetch(preferredFavicon.src);
+        if (!faviconResponse.ok) {
+            return new NextResponse('', { status: faviconResponse.status });
+        }
+
+        const faviconBuffer = await faviconResponse.arrayBuffer();
+        return new NextResponse(faviconBuffer, {
+            status: 200,
+            headers: {
+                'Content-Type': preferredFavicon.mime || 'image/png',
+                'Content-Length': faviconBuffer.byteLength.toString(),
+                'Access-Control-Allow-Origin': '*'
+            }
+        });
     } catch (err) {
-        // console.log(err);
-        return new NextResponse("Internal Server Error", { status: 500 });
+        return new NextResponse('', { 
+            status: 500,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Content-Type': 'text/plain'
+            }
+        });
     }
 }

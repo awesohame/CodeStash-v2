@@ -8,6 +8,8 @@ import { db } from "@/config/firebase";
 type StashContextType = {
     stashes: Stash[];
     setStashes: React.Dispatch<React.SetStateAction<Stash[]>>;
+    searchResults: Stash[];
+    setSearchResults: React.Dispatch<React.SetStateAction<Stash[]>>;
     createStash: (userEmail: string, stash: Omit<Stash, 'createdAt' | 'updatedAt' | 'isPinned' | 'id'>) => Promise<Stash | null>;
     readStashes: (userEmail: string) => Promise<void>;
     updateStash: (userEmail: string, id: string, stash: Partial<Stash>) => Promise<Stash | null>;
@@ -30,6 +32,7 @@ export const useStash = (): StashContextType => {
 
 export const StashProvider = ({ children }: { children: React.ReactNode }) => {
     const [stashes, setStashes] = useState<Stash[]>([]);
+    const [searchResults, setSearchResults] = useState<Stash[]>([]);
 
     const createStash = async (userEmail: string, stash: Omit<Stash, 'id' | 'createdAt' | 'updatedAt' | 'isPinned'>): Promise<Stash | null> => {
         try {
@@ -155,10 +158,34 @@ export const StashProvider = ({ children }: { children: React.ReactNode }) => {
 
     const togglePinStash = async (userEmail: string, id: string) => {
         try {
-            const stashToUpdate = stashes.find(stash => stash.id === id);
+            // Find the stash to update, prioritizing search results if they exist
+            const stashToUpdate =
+                searchResults.find(stash => stash.id === id) ||
+                stashes.find(stash => stash.id === id);
+
             if (stashToUpdate) {
                 const newPinnedState = !stashToUpdate.isPinned;
+
+                // Update stashes
+                setStashes(prevStashes =>
+                    prevStashes.map(stash =>
+                        stash.id === id ? { ...stash, isPinned: newPinnedState } : stash
+                    )
+                );
+
+                // If search results exist, update them as well
+                if (searchResults.length > 0) {
+                    setSearchResults(prevResults =>
+                        prevResults.map(stash =>
+                            stash.id === id ? { ...stash, isPinned: newPinnedState } : stash
+                        )
+                    );
+                }
+
+                // Persist the change in Firestore
                 await updateStash(userEmail, id, { isPinned: newPinnedState });
+            } else {
+                console.warn(`Stash with ID ${id} not found in stashes or search results`);
             }
         } catch (error) {
             console.error("Error toggling pin status: ", error);
@@ -210,7 +237,21 @@ export const StashProvider = ({ children }: { children: React.ReactNode }) => {
                 throw new Error('Failed to search stashes');
             }
             const results = await response.json();
-            return results;
+
+            // Normalize dates for search results and preserve pinned status
+            const normalizedResults = results.map((result: Stash) => {
+                // Find the original stash to get the pinned status
+                const originalStash = stashes.find(stash => stash.id === result.id);
+
+                return {
+                    ...result,
+                    createdAt: formatDate(result.createdAt),
+                    updatedAt: formatDate(result.updatedAt),
+                    isPinned: originalStash ? originalStash.isPinned : false
+                };
+            });
+
+            return normalizedResults;
         } catch (error) {
             console.error("Error searching stashes: ", error);
             return [];
@@ -221,6 +262,8 @@ export const StashProvider = ({ children }: { children: React.ReactNode }) => {
         <StashContext.Provider value={{
             stashes,
             setStashes,
+            searchResults,
+            setSearchResults,
             createStash,
             readStashes,
             updateStash,

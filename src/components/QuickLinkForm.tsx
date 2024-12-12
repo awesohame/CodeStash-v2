@@ -44,10 +44,13 @@ const QuickLinkForm = () => {
 
     async function onSubmit(values: z.infer<typeof quickLinkSchema>) {
         try {
+            const iconFile = values.icon?.[0] || await fetchDefaultFavicon();
+
             await addQuickLink({
                 title: values.title,
                 url: values.url,
-            }, values.icon?.[0]);
+            }, iconFile);
+
             toast.success("Quicklink added successfully")
             form.reset()
             setIconPreview(null)
@@ -56,6 +59,13 @@ const QuickLinkForm = () => {
             console.error(error)
         }
     }
+
+    // Fetch the default favicon from the public directory
+    const fetchDefaultFavicon = async (): Promise<File> => {
+        const response = await fetch('/default-favicon.png');
+        const blob = await response.blob();
+        return new File([blob], 'default-favicon.png', { type: 'image/png' });
+    };
 
     const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];

@@ -88,10 +88,11 @@ const Sidebar = () => {
                                 <DialogContent className='bg-dark-3 border-none rounded-xl'>
                                     <DialogHeader>
                                         <DialogTitle className='text-light-1 text-2xl font-semibold'>Create Quicklink</DialogTitle>
-                                        <DialogDescription>
-                                            <QuickLinkForm />
+                                        <DialogDescription className='text-light-2'>
+                                            Add a new quick link to your sidebar for easy access to your favorite websites.
                                         </DialogDescription>
                                     </DialogHeader>
+                                    <QuickLinkForm />
                                 </DialogContent>
                             </Dialog>
                         </div>

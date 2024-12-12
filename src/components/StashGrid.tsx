@@ -26,10 +26,9 @@ import { Stash } from '@/constants/types'
 
 export default function Component() {
     const router = useRouter()
-    const { stashes, createStash, readStashes, deleteStash, togglePinStash, searchStashes } = useStash()
+    const { stashes, createStash, readStashes, deleteStash, togglePinStash, searchStashes, searchResults, setSearchResults } = useStash()
     const { user, username } = useAuth()
     const [searchQuery, setSearchQuery] = useState('')
-    const [searchResults, setSearchResults] = useState<Stash[]>([])
     const [isSearching, setIsSearching] = useState(false)
     const [isAdvancedSearch, setIsAdvancedSearch] = useState(false)
     const [isRefreshing, setIsRefreshing] = useState(false)
@@ -84,28 +83,36 @@ export default function Component() {
 
     const handleSearch = async () => {
         if (user?.email && searchQuery.trim()) {
-            setIsSearching(true)
+            setIsSearching(true);
             try {
                 if (isAdvancedSearch) {
-                    const results = await searchStashes(searchQuery, user.email, searchIndex)
-                    setSearchResults(results)
+                    const results = await searchStashes(searchQuery, user.email, searchIndex);
+
+                    // If results are empty, retry once
+                    if (results.length === 0) {
+                        console.warn('Empty search results, retrying...');
+                        const retryResults = await searchStashes(searchQuery, user.email, searchIndex);
+                        setSearchResults(retryResults);
+                    } else {
+                        setSearchResults(results);
+                    }
                 } else {
                     const results = stashes.filter(stash =>
                         stash.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         stash.desc.toLowerCase().includes(searchQuery.toLowerCase())
-                    )
-                    setSearchResults(results)
+                    );
+                    setSearchResults(results);
                 }
             } catch (error) {
-                console.error('Error searching stashes:', error)
-                setSearchResults([])
+                console.error('Error searching stashes:', error);
+                setSearchResults([]);
             } finally {
-                setIsSearching(false)
+                setIsSearching(false);
             }
         } else {
-            setSearchResults([])
+            setSearchResults([]);
         }
-    }
+    };
 
     const handleViewAllStashes = () => {
         setSearchResults([])
