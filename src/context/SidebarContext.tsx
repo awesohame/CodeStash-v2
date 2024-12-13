@@ -13,6 +13,7 @@ type SidebarContextType = {
     removeQuickLink: (url: string) => Promise<void>;
     updateQuickLink: (oldUrl: string, updatedQuickLink: QuickLink, iconFile?: File) => Promise<void>;
     refreshQuickLinks: () => Promise<void>;
+    updateQuickLinks: (newQuickLinks: QuickLink[]) => Promise<void>; // New method
 };
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
@@ -107,6 +108,12 @@ export const SidebarProvider = ({ children }: SidebarProviderProps) => {
         await updateFirestore(updatedQuickLinks);
     };
 
+    // New method to update entire quickLinks array (for reordering)
+    const updateQuickLinks = async (newQuickLinks: QuickLink[]) => {
+        setQuickLinks(newQuickLinks);
+        await updateFirestore(newQuickLinks);
+    };
+
     return (
         <SidebarContext.Provider value={{
             quickLinks,
@@ -114,7 +121,8 @@ export const SidebarProvider = ({ children }: SidebarProviderProps) => {
             addQuickLink,
             removeQuickLink,
             updateQuickLink,
-            refreshQuickLinks
+            refreshQuickLinks,
+            updateQuickLinks // Added to the context
         }}>
             {children}
         </SidebarContext.Provider>

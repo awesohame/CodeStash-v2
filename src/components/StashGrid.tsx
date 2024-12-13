@@ -245,29 +245,41 @@ export default function Component() {
                                 Advanced Search Options
                             </AccordionTrigger>
                             <AccordionContent>
-                                <div className="bg-dark-3 p-4 rounded-lg">
-                                    <div className="space-y-4">
-                                        <div>
-                                            <Label className="text-light-2">Search In</Label>
-                                            <RadioGroup
-                                                defaultValue="desc"
-                                                onValueChange={(value: 'desc' | 'sections') => setSearchIndex(value)}
-                                                className="mt-2 space-y-2"
-                                            >
-                                                <div className="flex items-center space-x-2">
-                                                    <RadioGroupItem value="desc" id="desc" />
-                                                    <Label htmlFor="desc" className="text-light-3">
-                                                        Description
-                                                    </Label>
-                                                </div>
-                                                <div className="flex items-center space-x-2">
-                                                    <RadioGroupItem value="sections" id="sections" />
-                                                    <Label htmlFor="sections" className="text-light-3">
-                                                        Stash Contents
-                                                    </Label>
-                                                </div>
-                                            </RadioGroup>
-                                        </div>
+                                <div className="bg-dark-3 bg-opacity-50 p-6 rounded-xl border border-dark-4 shadow-lg backdrop-blur-sm">
+                                    <div className="space-y-5">
+                                        <Label className="text-light-1 text-lg font-semibold mb-3 block">Search In</Label>
+                                        <RadioGroup
+                                            defaultValue="desc"
+                                            onValueChange={(value: 'desc' | 'sections') => setSearchIndex(value)}
+                                            className="space-y-3"
+                                        >
+                                            <div className="flex items-center space-x-3 transition-all duration-200 hover:bg-dark-4 hover:bg-opacity-30 p-2 rounded-lg cursor-pointer group">
+                                                <RadioGroupItem
+                                                    value="desc"
+                                                    id="desc"
+                                                    className="border-light-3 text-light-1 focus:border-light-1"
+                                                />
+                                                <Label
+                                                    htmlFor="desc"
+                                                    className="text-light-2 group-hover:text-light-1 transition-colors duration-200 cursor-pointer"
+                                                >
+                                                    Description
+                                                </Label>
+                                            </div>
+                                            <div className="flex items-center space-x-3 transition-all duration-200 hover:bg-dark-4 hover:bg-opacity-30 p-2 rounded-lg cursor-pointer group">
+                                                <RadioGroupItem
+                                                    value="sections"
+                                                    id="sections"
+                                                    className="border-light-3 text-light-1 focus:border-light-1"
+                                                />
+                                                <Label
+                                                    htmlFor="sections"
+                                                    className="text-light-2 group-hover:text-light-1 transition-colors duration-200 cursor-pointer"
+                                                >
+                                                    Stash Contents
+                                                </Label>
+                                            </div>
+                                        </RadioGroup>
                                     </div>
                                 </div>
                             </AccordionContent>

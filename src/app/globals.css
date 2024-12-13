@@ -67,3 +67,52 @@
       @apply bg-background text-foreground;
     }
   }
+
+  @layer base {
+    /* Webkit (Chrome, Safari, newer versions of Opera) */
+    *::-webkit-scrollbar {
+      width: 12px; /* Vertical scrollbar width */
+      height: 12px; /* Horizontal scrollbar height */
+    }
+  
+    *::-webkit-scrollbar-track {
+      background: #0A2342; /* Deep navy blue background */
+      border-radius: 10px;
+    }
+  
+    *::-webkit-scrollbar-thumb {
+      background: #1F4E79; /* Bright blue from the color scheme */
+      border-radius: 10px;
+      border: 3px solid #0A2342;
+    }
+  
+    *::-webkit-scrollbar-thumb:hover {
+      background: #2A6B9E; /* Lighter blue on hover */
+    }
+  
+    /* Firefox scrollbar styles */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: #1F4E79 #0A2342;
+    }
+  
+    /* Ensure dark mode consistency */
+    .dark {
+      *::-webkit-scrollbar-track {
+        background: #0A2342;
+      }
+  
+      *::-webkit-scrollbar-thumb {
+        background: #1F4E79;
+        border: 3px solid #0A2342;
+      }
+  
+      *::-webkit-scrollbar-thumb:hover {
+        background: #2A6B9E;
+      }
+  
+      * {
+        scrollbar-color: #1F4E79 #0A2342;
+      }
+    }
+  }

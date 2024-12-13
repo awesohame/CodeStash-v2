@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { FaPlus } from "react-icons/fa6";
 import { Button } from '../ui/button';
 import { FiMoreVertical } from "react-icons/fi";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, GripVertical, Check, X } from 'lucide-react';
 import {
     Tooltip,
     TooltipContent,
@@ -24,6 +24,12 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
+import {
+    DragDropContext,
+    Droppable,
+    Draggable,
+    DropResult
+} from '@hello-pangea/dnd';
 import Link from 'next/link';
 import SidebarIcon from './SidebarIcon';
 import QuickLinkForm from '../QuickLinkForm';
@@ -34,13 +40,47 @@ import Image from 'next/image';
 
 const Sidebar = () => {
     const { user } = useAuth();
-    const { quickLinks, refreshQuickLinks } = useSidebar();
+    const { quickLinks, refreshQuickLinks, updateQuickLinks } = useSidebar();
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [isReorderMode, setIsReorderMode] = useState(false);
+    const [reorderLinks, setReorderLinks] = useState([...quickLinks]);
 
     const handleRefresh = async () => {
         setIsRefreshing(true);
         await refreshQuickLinks();
         setIsRefreshing(false);
+    };
+
+    const onDragEnd = (result: DropResult) => {
+        const { destination, source } = result;
+
+        // If dropped outside the list or in the same position
+        if (!destination ||
+            (destination.droppableId === source.droppableId &&
+                destination.index === source.index)) {
+            return;
+        }
+
+        // Create a copy of the links and reorder
+        const newLinks = Array.from(reorderLinks);
+        const [reorderedItem] = newLinks.splice(source.index, 1);
+        newLinks.splice(destination.index, 0, reorderedItem);
+
+        setReorderLinks(newLinks);
+    };
+
+    const handleStartReordering = () => {
+        setReorderLinks([...quickLinks]);
+        setIsReorderMode(true);
+    };
+
+    const handleCancelReordering = () => {
+        setIsReorderMode(false);
+    };
+
+    const handleSaveReordering = () => {
+        updateQuickLinks(reorderLinks);
+        setIsReorderMode(false);
     };
 
     return (
@@ -53,94 +93,175 @@ const Sidebar = () => {
                     <div className='text-xl text-light-1 flex justify-between items-center mb-4'>
                         <span className='font-semibold'>Quick Links</span>
                         <div className='flex items-center'>
-                            <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Button
-                                            onClick={handleRefresh}
-                                            disabled={isRefreshing}
-                                            className='mr-2 rounded-full hover:bg-dark-4 text-light-2 hover:text-light-1 p-2 h-auto bg-transparent cursor-pointer transition-colors duration-200'
-                                        >
-                                            <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-                                        </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent className='bg-light-1 text-dark-0 border-none'>
-                                        <span>Refresh Quick Links</span>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
-
-                            <Dialog>
-                                <DialogTrigger>
+                            {!isReorderMode ? (
+                                <>
                                     <TooltipProvider>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <div className='rounded-full hover:bg-dark-4 text-light-2 hover:text-light-1 p-2 h-auto bg-transparent cursor-pointer transition-colors duration-200'>
-                                                    <FaPlus className='text-xl' />
-                                                </div>
+                                                <Button
+                                                    onClick={handleRefresh}
+                                                    disabled={isRefreshing}
+                                                    className='mr-2 rounded-full hover:bg-dark-4 text-light-2 hover:text-light-1 p-2 h-auto bg-transparent cursor-pointer transition-colors duration-200'
+                                                >
+                                                    <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                                                </Button>
                                             </TooltipTrigger>
                                             <TooltipContent className='bg-light-1 text-dark-0 border-none'>
-                                                <span>Add a Quick Link</span>
+                                                <span>Refresh Quick Links</span>
                                             </TooltipContent>
                                         </Tooltip>
                                     </TooltipProvider>
-                                </DialogTrigger>
-                                <DialogContent className='bg-dark-3 border-none rounded-xl'>
-                                    <DialogHeader>
-                                        <DialogTitle className='text-light-1 text-2xl font-semibold'>Create Quicklink</DialogTitle>
-                                        <DialogDescription className='text-light-2'>
-                                            Add a new quick link to your sidebar for easy access to your favorite websites.
-                                        </DialogDescription>
-                                    </DialogHeader>
-                                    <QuickLinkForm />
-                                </DialogContent>
-                            </Dialog>
+
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    onClick={handleStartReordering}
+                                                    className='mr-2 rounded-full hover:bg-dark-4 text-light-2 hover:text-light-1 p-2 h-auto bg-transparent cursor-pointer transition-colors duration-200'
+                                                >
+                                                    <GripVertical className='w-5 h-5' />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent className='bg-light-1 text-dark-0 border-none'>
+                                                <span>Reorder Quick Links</span>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+
+                                    <Dialog>
+                                        <DialogTrigger>
+                                            <TooltipProvider>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <div className='rounded-full hover:bg-dark-4 text-light-2 hover:text-light-1 p-2 h-auto bg-transparent cursor-pointer transition-colors duration-200'>
+                                                            <FaPlus className='text-xl' />
+                                                        </div>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent className='bg-light-1 text-dark-0 border-none'>
+                                                        <span>Add a Quick Link</span>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
+                                        </DialogTrigger>
+                                        <DialogContent className='bg-dark-3 border-none rounded-xl'>
+                                            <DialogHeader>
+                                                <DialogTitle className='text-light-1 text-2xl font-semibold'>Create Quicklink</DialogTitle>
+                                                <DialogDescription className='text-light-2'>
+                                                    Add a new quick link to your sidebar for easy access to your favorite websites.
+                                                </DialogDescription>
+                                            </DialogHeader>
+                                            <QuickLinkForm />
+                                        </DialogContent>
+                                    </Dialog>
+                                </>
+                            ) : (
+                                <div className='flex items-center'>
+                                    <Button
+                                        onClick={handleSaveReordering}
+                                        className='mr-2 rounded-full hover:bg-dark-4 text-light-2 hover:text-light-1 p-2 h-auto bg-transparent cursor-pointer transition-colors duration-200'
+                                    >
+                                        <Check className="w-5 h-5" />
+                                    </Button>
+                                    <Button
+                                        onClick={handleCancelReordering}
+                                        className='rounded-full hover:bg-dark-4 text-light-2 hover:text-light-1 p-2 h-auto bg-transparent cursor-pointer transition-colors duration-200'
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
 
                 <div className='flex-grow overflow-y-auto px-4'>
-                    <div className='flex flex-col gap-2'>
-                        {quickLinks.map((quicklink, index) => (
-                            <div key={index} className='flex items-center bg-dark-3 bg-opacity-30 rounded-lg hover:bg-opacity-50 transition-all duration-200'>
-                                <Link href={quicklink.url} className='grow py-2 px-3 flex gap-2 text-light-2 hover:text-light-1'>
-                                    {quicklink.icon ? (
-                                        <Image
-                                            src={quicklink.icon}
-                                            alt={quicklink.title}
-                                            width={20}
-                                            height={20}
-                                            className="rounded"
-                                        />
-                                    ) : (
-                                        <SidebarIcon link={quicklink.url} className='w-5 h-5' />
-                                    )}
-                                    <span className='text-sm'>
-                                        {quicklink.title}
-                                    </span>
-                                </Link>
-                                <div className='flex justify-end pr-2'>
-                                    <Popover>
-                                        <PopoverTrigger>
-                                            <div className='rounded-full p-1 text-light-3 hover:text-light-1 hover:bg-dark-4 transition-colors duration-200'>
-                                                <FiMoreVertical className='text-lg' />
-                                            </div>
-                                        </PopoverTrigger>
-                                        <PopoverContent className='bg-dark-2 border-none w-[180px] transform translate-y-2 -translate-x-18 rounded-xl'>
-                                            <QuickLinkActions
-                                                title={quicklink.title}
-                                                url={quicklink.url}
-                                                icon={quicklink.icon}
-                                            />
-                                        </PopoverContent>
-                                    </Popover>
+                    <DragDropContext onDragEnd={onDragEnd}>
+                        <Droppable droppableId="quicklinks">
+                            {(provided) => (
+                                <div
+                                    {...provided.droppableProps}
+                                    ref={provided.innerRef}
+                                    className='flex flex-col gap-2'
+                                >
+                                    {(isReorderMode ? reorderLinks : quickLinks).map((quicklink, index) => (
+                                        <Draggable
+                                            key={`${quicklink.title}-${index}`}
+                                            draggableId={`${quicklink.title}-${index}`}
+                                            index={index}
+                                            isDragDisabled={!isReorderMode}
+                                        >
+                                            {(provided, snapshot) => (
+                                                <div
+                                                    ref={provided.innerRef}
+                                                    {...provided.draggableProps}
+                                                    className={`
+                                                        flex items-center 
+                                                        bg-dark-3 bg-opacity-30 
+                                                        rounded-lg 
+                                                        hover:bg-opacity-50 
+                                                        transition-all 
+                                                        duration-200
+                                                        ${snapshot.isDragging ? 'shadow-lg' : ''}
+                                                    `}
+                                                >
+                                                    <Link
+                                                        href={quicklink.url}
+                                                        className='grow py-2 px-3 flex gap-2 text-light-2 hover:text-light-1'
+                                                    >
+                                                        {quicklink.icon ? (
+                                                            <Image
+                                                                src={quicklink.icon}
+                                                                alt={quicklink.title}
+                                                                width={20}
+                                                                height={20}
+                                                                className="rounded"
+                                                            />
+                                                        ) : (
+                                                            <SidebarIcon link={quicklink.url} className='w-5 h-5' />
+                                                        )}
+                                                        <span className='text-sm'>
+                                                            {quicklink.title}
+                                                        </span>
+                                                    </Link>
+                                                    {!isReorderMode && (
+                                                        <div className='flex justify-end pr-2'>
+                                                            <Popover>
+                                                                <PopoverTrigger>
+                                                                    <div className='rounded-full p-1 text-light-3 hover:text-light-1 hover:bg-dark-4 transition-colors duration-200'>
+                                                                        <FiMoreVertical className='text-lg' />
+                                                                    </div>
+                                                                </PopoverTrigger>
+                                                                <PopoverContent className='bg-dark-2 border-none w-[180px] transform translate-y-2 -translate-x-18 rounded-xl'>
+                                                                    <QuickLinkActions
+                                                                        title={quicklink.title}
+                                                                        url={quicklink.url}
+                                                                        icon={quicklink.icon}
+                                                                    />
+                                                                </PopoverContent>
+                                                            </Popover>
+                                                        </div>
+                                                    )}
+                                                    {isReorderMode && (
+                                                        <div
+                                                            {...provided.dragHandleProps}
+                                                            className='p-2 cursor-move flex justify-end'
+                                                        >
+                                                            <GripVertical className='text-light-2 w-5 h-5' />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </Draggable>
+                                    ))}
+                                    {provided.placeholder}
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            )}
+                        </Droppable>
+                    </DragDropContext>
                 </div>
             </div>
 
+            {/* Rest of the component remains the same */}
             <div className='px-4 py-4 flex justify-between items-center bg-dark-3 bg-opacity-30 mt-auto'>
                 <span className='text-xl text-light-1 font-semibold'>{user?.displayName || user?.email?.split("@")[0]}</span>
 
@@ -165,3 +286,4 @@ const Sidebar = () => {
 }
 
 export default Sidebar
+

@@ -13,7 +13,7 @@ const DashboardLayout = ({ children }: Readonly<{ children: ReactNode }>) => {
     return (
         <main className="text-light-1 w-full h-screen flex bg-dark-2 overflow-hidden">
             <SidebarProvider>
-                <div className="fixed h-screen">
+                <div className="fixed h-screen z-50">
                     <Sidebar />
                 </div>
             </SidebarProvider>
