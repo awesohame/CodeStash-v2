@@ -206,6 +206,7 @@ const Sidebar = () => {
                                                 >
                                                     <Link
                                                         href={quicklink.url}
+                                                        target="_blank" rel="noopener noreferrer"
                                                         className='grow py-2 px-3 flex gap-2 text-light-2 hover:text-light-1'
                                                     >
                                                         {quicklink.icon ? (
@@ -231,7 +232,7 @@ const Sidebar = () => {
                                                                         <FiMoreVertical className='text-lg' />
                                                                     </div>
                                                                 </PopoverTrigger>
-                                                                <PopoverContent className='bg-dark-2 border-none w-[180px] transform translate-y-2 -translate-x-18 rounded-xl'>
+                                                                <PopoverContent className='bg-dark-3 bg-opacity-70 backdrop-blur-lg border-none transform -translate-y-1 -translate-x-18 rounded-xl w-auto p-2'>
                                                                     <QuickLinkActions
                                                                         title={quicklink.title}
                                                                         url={quicklink.url}
@@ -261,7 +262,6 @@ const Sidebar = () => {
                 </div>
             </div>
 
-            {/* Rest of the component remains the same */}
             <div className='px-4 py-4 flex justify-between items-center bg-dark-3 bg-opacity-30 mt-auto'>
                 <span className='text-xl text-light-1 font-semibold'>{user?.displayName || user?.email?.split("@")[0]}</span>
 
@@ -271,7 +271,7 @@ const Sidebar = () => {
                             <FiMoreVertical className='text-xl' />
                         </div>
                     </PopoverTrigger>
-                    <PopoverContent className='bg-dark-2 border-none w-[200px] transform -translate-y-3 -translate-x-18 rounded-xl'>
+                    <PopoverContent className='bg-dark-2 bg-opacity-70 backdrop-blur-lg border-none w-auto transform -translate-y-3 -translate-x-18 rounded-xl'>
                         <div className='flex flex-col gap-2'>
                             <Button className='text-dark-0 bg-light-2 hover:bg-light-3 transition-colors duration-200'>
                                 <Link href='/settings' className='h-full w-full flex justify-center items-center'>Settings</Link>
@@ -286,4 +286,3 @@ const Sidebar = () => {
 }
 
 export default Sidebar
-
