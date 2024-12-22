@@ -42,7 +42,7 @@ export async function searchStashes(
     const results = await embeddingsCollection.aggregate([
       {
         "$vectorSearch": {
-          "index": "stash_vsearch_index",
+          "index": process.env.MONGODB_VSEARCH_INDEX as string,
           "path": indexPath,
           "queryVector": queryEmbedding,
           "numCandidates": 100,
