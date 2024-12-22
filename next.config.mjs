@@ -52,8 +52,9 @@
 // export default withTM(['ioredis', 'mongodb'])(nextConfig);
 const nextConfig = {
   images: {
-        domains: ['firebasestorage.googleapis.com'],
+    domains: ['firebasestorage.googleapis.com'],
   },
+  reactStrictMode: false,
 };
 
 export default nextConfig;
