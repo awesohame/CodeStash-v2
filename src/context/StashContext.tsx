@@ -53,7 +53,7 @@ export const StashProvider = ({ children }: { children: React.ReactNode }) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userEmail, stash: { ...stash, id: docRef.id } }),
             });
-
+            // console.log('response', response);
             if (!response.ok) {
                 throw new Error('Failed to store embeddings');
             }

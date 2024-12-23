@@ -192,9 +192,9 @@ export default function Component() {
     )
 
     return (
-        <div className="space-y-8">
-            <div className="flex flex-col gap-4 mb-8">
-                <div className="flex items-center gap-4">
+        <div className="p-6">
+            <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                <div className="flex-grow flex items-center gap-2">
                     <Input
                         type="text"
                         placeholder="Search stashes..."
@@ -209,6 +209,8 @@ export default function Component() {
                     >
                         {isSearching ? 'Searching...' : <Search className="w-4 h-4" />}
                     </Button>
+                </div>
+                <div className="flex items-center justify-between sm:justify-end gap-4">
                     <div className="flex items-center space-x-2">
                         <span className="text-light-2 text-sm">Advanced</span>
                         <Switch
@@ -228,7 +230,7 @@ export default function Component() {
                             onClick={handleViewAllStashes}
                             className="bg-dark-4 hover:bg-dark-5 text-light-1"
                         >
-                            View All Stashes
+                            View All
                         </Button>
                     )}
                 </div>
@@ -288,63 +290,10 @@ export default function Component() {
                 )}
             </div>
 
-            {searchResults.length > 0 ? (
-                <div>
-                    <h2 className="text-2xl font-bold text-light-1 mb-4">Search Results</h2>
-                    <Masonry
-                        breakpointCols={breakpointColumnsObj}
-                        className="flex w-auto -ml-6"
-                        columnClassName="pl-6 bg-clip-padding"
-                    >
-                        <div
-                            className="bg-dark-3 border border-dark-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer mb-6 w-full h-[200px]"
-                            onClick={handleCreateNewStash}
-                        >
-                            <div className="flex flex-col items-center justify-center h-full p-8">
-                                <PlusCircle className="w-16 h-16 text-light-3 mb-4" />
-                                <p className="text-light-2 text-lg font-semibold">Create New Stash</p>
-                            </div>
-                        </div>
-                        {searchResults.map(renderStashCard)}
-                    </Masonry>
-                </div>
-            ) : (
-                <>
-                    {pinnedStashes.length > 0 && (
-                        <div>
-                            <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-2xl font-bold text-light-1">Pinned Stashes</h2>
-                                <Button
-                                    onClick={handleRefresh}
-                                    disabled={isRefreshing}
-                                    className="bg-dark-4 hover:bg-dark-5 text-light-1"
-                                >
-                                    {isRefreshing ? 'Refreshing...' : <RefreshCw className="w-4 h-4" />}
-                                </Button>
-                            </div>
-                            <Masonry
-                                breakpointCols={breakpointColumnsObj}
-                                className="flex w-auto -ml-6"
-                                columnClassName="pl-6 bg-clip-padding"
-                            >
-                                {pinnedStashes.map(renderStashCard)}
-                            </Masonry>
-                        </div>
-                    )}
-
+            {
+                searchResults.length > 0 ? (
                     <div>
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-2xl font-bold text-light-1">All Stashes</h2>
-                            {!pinnedStashes.length && (
-                                <Button
-                                    onClick={handleRefresh}
-                                    disabled={isRefreshing}
-                                    className="bg-dark-4 hover:bg-dark-5 text-light-1"
-                                >
-                                    {isRefreshing ? 'Refreshing...' : <RefreshCw className="w-4 h-4" />}
-                                </Button>
-                            )}
-                        </div>
+                        <h2 className="text-2xl font-bold text-light-1 mb-4">Search Results</h2>
                         <Masonry
                             breakpointCols={breakpointColumnsObj}
                             className="flex w-auto -ml-6"
@@ -359,11 +308,66 @@ export default function Component() {
                                     <p className="text-light-2 text-lg font-semibold">Create New Stash</p>
                                 </div>
                             </div>
-                            {normalStashes.map(renderStashCard)}
+                            {searchResults.map(renderStashCard)}
                         </Masonry>
                     </div>
-                </>
-            )}
-        </div>
+                ) : (
+                    <>
+                        {pinnedStashes.length > 0 && (
+                            <div>
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-2xl font-bold text-light-1">Pinned Stashes</h2>
+                                    <Button
+                                        onClick={handleRefresh}
+                                        disabled={isRefreshing}
+                                        className="bg-dark-4 hover:bg-dark-5 text-light-1"
+                                    >
+                                        {isRefreshing ? 'Refreshing...' : <RefreshCw className="w-4 h-4" />}
+                                    </Button>
+                                </div>
+                                <Masonry
+                                    breakpointCols={breakpointColumnsObj}
+                                    className="flex w-auto -ml-6"
+                                    columnClassName="pl-6 bg-clip-padding"
+                                >
+                                    {pinnedStashes.map(renderStashCard)}
+                                </Masonry>
+                            </div>
+                        )}
+
+                        <div>
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-2xl font-bold text-light-1">All Stashes</h2>
+                                {!pinnedStashes.length && (
+                                    <Button
+                                        onClick={handleRefresh}
+                                        disabled={isRefreshing}
+                                        className="bg-dark-4 hover:bg-dark-5 text-light-1"
+                                    >
+                                        {isRefreshing ? 'Refreshing...' : <RefreshCw className="w-4 h-4" />}
+                                    </Button>
+                                )}
+                            </div>
+                            <Masonry
+                                breakpointCols={breakpointColumnsObj}
+                                className="flex w-auto -ml-6"
+                                columnClassName="pl-6 bg-clip-padding"
+                            >
+                                <div
+                                    className="bg-dark-3 border border-dark-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer mb-6 w-full h-[200px]"
+                                    onClick={handleCreateNewStash}
+                                >
+                                    <div className="flex flex-col items-center justify-center h-full p-8">
+                                        <PlusCircle className="w-16 h-16 text-light-3 mb-4" />
+                                        <p className="text-light-2 text-lg font-semibold">Create New Stash</p>
+                                    </div>
+                                </div>
+                                {normalStashes.map(renderStashCard)}
+                            </Masonry>
+                        </div>
+                    </>
+                )
+            }
+        </div >
     )
 }

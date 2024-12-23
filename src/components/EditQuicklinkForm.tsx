@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input"
 import toast from 'react-hot-toast'
 import { useSidebar } from '@/context/SidebarContext'
+import Image from 'next/image'
 
 const MAX_FILE_SIZE = 5000000; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/svg+xml"];
@@ -74,9 +75,9 @@ const EditQuicklinkForm: React.FC<{
     };
 
     return (
-        <div className="px-6 pt-2">
+        <div className="px-6 pt-2 w-full pb-8 max-w-md mx-auto">
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:px-4">
                     <FormField
                         control={form.control}
                         name="title"
@@ -120,14 +121,26 @@ const EditQuicklinkForm: React.FC<{
                                         {...field}
                                     />
                                 </FormControl>
-                                {iconPreview && (
-                                    <img src={iconPreview} alt="Icon preview" className="mt-2 w-10 h-10 object-cover" />
-                                )}
+                                <div className="flex justify-center mt-4">
+                                    {iconPreview && (
+                                        <Image
+                                            src={iconPreview}
+                                            alt="Icon preview"
+                                            width={100}
+                                            height={100}
+                                            className="object-cover rounded-md"
+                                        />
+                                    )}
+                                </div>
                                 <FormMessage className='font-medium' />
                             </FormItem>
                         )}
                     />
-                    <Button type='submit' className="w-full bg-dark-1 hover:bg-dark-0">Update Quicklink</Button>
+                    <div className="pt-4">
+                        <Button type='submit' className="w-full bg-dark-1 hover:bg-dark-0 sm:w-auto sm:px-8 sm:mx-auto block">
+                            Update Quicklink
+                        </Button>
+                    </div>
                 </form>
             </Form>
         </div>
@@ -135,3 +148,4 @@ const EditQuicklinkForm: React.FC<{
 }
 
 export default EditQuicklinkForm
+

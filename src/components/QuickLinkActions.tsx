@@ -32,14 +32,14 @@ const QuickLinkActions = ({
     }
 
     return (
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-1 w-full">
             <Dialog>
                 <DialogTrigger asChild>
                     <Button variant="ghost" size="icon" className="text-light-2 hover:text-light-1 hover:bg-dark-4">
                         <Pencil className="h-4 w-4" />
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="bg-dark-4 bg-opacity-70 backdrop-blur-lg border-none rounded-xl p-0 w-auto max-w-[90vw] sm:max-w-[400px]">
+                <DialogContent className="bg-dark-4 bg-opacity-70 backdrop-blur-lg border-none rounded-xl p-0 xl:w-auto max-w-[90vw]">
                     <EditQuicklinkForm title={title} url={url} icon={icon} />
                 </DialogContent>
             </Dialog>

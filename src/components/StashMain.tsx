@@ -150,22 +150,24 @@ export default function StashMain() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-dark-0 to-dark-2 text-light-1">
-            <div className="container mx-auto px-4 py-8">
-                <Link href={`/${username}`} className="flex items-center text-light-3 hover:text-light-1 transition-colors duration-200 mb-6">
-                    <ArrowLeftIcon className="w-5 h-5 mr-2" />
-                    Back to Dashboard
-                </Link>
-                <div className="bg-dark-3 rounded-lg shadow-xl p-8 border border-dark-4">
+            <div className="container mx-auto px-4 py-8 max-w-7xl">
+                <div className="flex justify-between items-center mb-6">
+                    <Link href={`/${username}`} className="flex items-center text-light-3 hover:text-light-1 transition-colors duration-200 md:order-1 order-2 ml-auto md:ml-0">
+                        <ArrowLeftIcon className="w-5 h-5 mr-2" />
+                        <span>Back to Dashboard</span>
+                    </Link>
+                </div>
+                <div className="bg-dark-3 rounded-lg shadow-xl p-4 sm:p-6 md:p-8 border border-dark-4">
                     <div className="mb-8">
                         {isEditing ? (
                             <Input
                                 name="title"
                                 value={editedStash?.title || ''}
                                 onChange={handleInputChange}
-                                className="text-3xl font-bold mb-4 bg-dark-2 text-light-1 border-dark-4 shadow-inner"
+                                className="text-2xl sm:text-3xl font-bold mb-4 bg-dark-2 text-light-1 border-dark-4 shadow-inner"
                             />
                         ) : (
-                            <h1 className="text-4xl font-bold mb-4 text-light-1">{currentStash.title}</h1>
+                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-light-1">{currentStash.title}</h1>
                         )}
                         {isEditing ? (
                             <Textarea
@@ -175,7 +177,7 @@ export default function StashMain() {
                                 className="mb-4 bg-dark-2 text-light-2 border-dark-4 shadow-inner"
                             />
                         ) : (
-                            <p className="text-light-2 mb-4 text-lg">{currentStash.desc}</p>
+                            <p className="text-light-2 mb-4 text-base md:text-lg">{currentStash.desc}</p>
                         )}
                         {isEditing ? (
                             <div className="mb-4">
@@ -211,13 +213,17 @@ export default function StashMain() {
                                 ))}
                             </div>
                         )}
-                        <div className="flex items-center text-sm text-light-3 mb-6">
-                            <ClockIcon className="w-4 h-4 mr-2" />
-                            <span>Created: {new Date(currentStash.createdAt).toLocaleString()}</span>
-                            <span className="mx-2">|</span>
-                            <span>Updated: {new Date(currentStash.updatedAt as string).toLocaleString()}</span>
+                        <div className="flex items-center text-xs sm:text-sm text-light-3 mb-6">
+                            <div className="flex items-center mr-4">
+                                <ClockIcon className="w-5 h-5 mr-2" />
+                                <span>Created: {new Date(currentStash.createdAt).toLocaleDateString()}</span>
+                            </div>
+                            <div className="flex items-center">
+                                <ClockIcon className="w-5 h-5 mr-2" />
+                                <span>Updated: {new Date(currentStash.updatedAt as string).toLocaleDateString()}</span>
+                            </div>
                         </div>
-                        <div className="flex gap-4">
+                        <div className="flex flex-col sm:flex-row gap-4">
                             {isEditing ? (
                                 <>
                                     <Button onClick={handleSave} className="bg-dark-5 hover:bg-dark-4 text-light-1 shadow-md transition-all duration-200 transform hover:scale-105">
@@ -245,7 +251,7 @@ export default function StashMain() {
                     </div>
                     <div className="space-y-8 mt-8">
                         {(isEditing && editedStash ? editedStash?.stashSections : currentStash.stashSections).map((section, index) => (
-                            <div key={index} className="bg-dark-2 rounded-lg p-6 shadow-lg border border-dark-4">
+                            <div key={index} className="bg-dark-2 rounded-lg p-6 shadow-lg border border-dark-4 relative">
                                 {section.type === 'text' ? (
                                     isEditing ? (
                                         <Textarea
@@ -260,7 +266,8 @@ export default function StashMain() {
                                     <div className="relative">
                                         <CodeMirror
                                             value={section.content}
-                                            height="200px"
+                                            height="auto"
+                                            minHeight="100px"
                                             theme="dark"
                                             extensions={[javascript({ jsx: true })]}
                                             editable={isEditing}
@@ -270,14 +277,16 @@ export default function StashMain() {
                                         {!isEditing && (
                                             <Button
                                                 onClick={() => handleCopyCode(index, section.content)}
-                                                className={`absolute top-2 right-2 ${copiedSections[index] ? 'bg-green-600' : 'bg-dark-5 hover:bg-dark-4'} text-light-1 shadow-md transition-all duration-200`}
+                                                className={`absolute bottom-2 right-2 p-2 w-10 h-10 ${copiedSections[index] ? 'bg-green-600' : 'bg-dark-5 hover:bg-dark-4'} text-light-1 shadow-md transition-all duration-200`}
                                             >
                                                 {copiedSections[index] ? (
-                                                    <CheckIcon className="w-4 h-4 mr-2" />
+                                                    <CheckIcon className="w-5 h-5" />
                                                 ) : (
-                                                    <CopyIcon className="w-4 h-4 mr-2" />
+                                                    <CopyIcon className="w-5 h-5" />
                                                 )}
-                                                {copiedSections[index] ? 'Copied!' : 'Copy'}
+                                                <span className="sr-only">
+                                                    {copiedSections[index] ? 'Copied!' : 'Copy'}
+                                                </span>
                                             </Button>
                                         )}
                                     </div>
@@ -291,7 +300,7 @@ export default function StashMain() {
                         ))}
                     </div>
                     {isEditing && (
-                        <div className="mt-8 flex gap-4">
+                        <div className="mt-8 flex flex-col sm:flex-row gap-4">
                             <Button onClick={() => addSection('text')} className="bg-dark-5 hover:bg-dark-4 text-light-1 shadow-md transition-all duration-200 transform hover:scale-105">
                                 <PlusIcon className="w-4 h-4 mr-2" />
                                 <TextIcon className="w-4 h-4 mr-2" />

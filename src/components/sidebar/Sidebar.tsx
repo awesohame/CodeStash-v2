@@ -38,7 +38,11 @@ import { useSidebar } from '@/context/SidebarContext';
 import { useAuth } from '@/context/AuthContext';
 import Image from 'next/image';
 
-const Sidebar = () => {
+interface SidebarProps {
+    onCloseSidebar: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ onCloseSidebar }) => {
     const { user } = useAuth();
     const { quickLinks, refreshQuickLinks, updateQuickLinks } = useSidebar();
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -84,9 +88,15 @@ const Sidebar = () => {
     };
 
     return (
-        <div className='w-[300px] h-screen flex flex-col bg-dark-1 bg-opacity-80 backdrop-blur-lg'>
-            <div className='w-full bg-gradient-to-r from-dark-4 to-dark-5 flex items-center justify-center px-4 py-5'>
+        <div className='w-full h-screen flex flex-col bg-dark-1 bg-opacity-80 backdrop-blur-lg'>
+            <div className='w-full bg-gradient-to-r from-dark-4 to-dark-5 flex items-center justify-between px-4 py-5'>
                 <h1 className='text-light-1 text-3xl font-bold'>CodeStash</h1>
+                <Button
+                    onClick={onCloseSidebar}
+                    className="md:hidden bg-dark-3 text-light-1 hover:bg-dark-2"
+                >
+                    <X size={24} />
+                </Button>
             </div>
             <div className='flex flex-col flex-grow overflow-hidden'>
                 <div className='px-4 py-4'>
