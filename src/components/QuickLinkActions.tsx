@@ -35,11 +35,11 @@ const QuickLinkActions = ({
         <div className="flex items-center space-x-1 w-full">
             <Dialog>
                 <DialogTrigger asChild>
-                    <Button variant="ghost" size="icon" className="text-light-2 hover:text-light-1 hover:bg-dark-4">
+                    <Button variant="ghost" size="icon" className="text-light-4 hover:text-light-1 hover:bg-dark-3/60 transition-all duration-300">
                         <Pencil className="h-4 w-4" />
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="bg-dark-4 bg-opacity-70 backdrop-blur-lg border-none rounded-xl p-0 xl:w-auto max-w-[90vw]">
+                <DialogContent className='bg-dark-1/95 backdrop-blur-xl border border-dark-3/40 rounded-2xl shadow-2xl'>
                     <EditQuicklinkForm title={title} url={url} icon={icon} />
                 </DialogContent>
             </Dialog>
@@ -47,7 +47,7 @@ const QuickLinkActions = ({
                 variant="ghost"
                 size="icon"
                 onClick={handleDelete}
-                className="text-light-2 hover:text-red-500 hover:bg-dark-4"
+                className="text-light-4 hover:text-theme-error hover:bg-dark-3/60 transition-all duration-300"
             >
                 <Trash2 className="h-4 w-4" />
             </Button>

@@ -11,24 +11,29 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
+import {
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import toast from 'react-hot-toast'
 import { useSidebar } from '@/context/SidebarContext'
 import Image from 'next/image'
 
-const MAX_FILE_SIZE = 5000000; // 5MB
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/svg+xml"];
+// const MAX_FILE_SIZE = 5000000; // 5MB
+// const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/svg+xml"];
 
 const editQuicklinkSchema = z.object({
     title: z.string().min(1, "Title must be at least 1 character long").max(100, "Title must be less than 100 characters"),
     url: z.string().url("Please enter a valid URL"),
-    icon: z.any()
-        .refine((files) => files?.length <= 1, "Only one image can be uploaded.")
-        .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE || files?.length === 0, `Max file size is 5MB.`)
-        .refine(
-            (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type) || files?.length === 0,
-            ".jpg, .jpeg, .png, .webp and .svg files are accepted."
-        ).optional(),
+    // icon: z.any()
+    //     .refine((files) => files?.length <= 1, "Only one image can be uploaded.")
+    //     .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE || files?.length === 0, `Max file size is 5MB.`)
+    //     .refine(
+    //         (files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type) || files?.length === 0,
+    //         ".jpg, .jpeg, .png, .webp and .svg files are accepted."
+    //     ).optional(),
 });
 
 const EditQuicklinkForm: React.FC<{
@@ -37,7 +42,7 @@ const EditQuicklinkForm: React.FC<{
     icon?: string
 }> = ({ title, url, icon }) => {
     const { updateQuickLink } = useSidebar();
-    const [iconPreview, setIconPreview] = useState<string | null>(icon || null);
+    // const [iconPreview, setIconPreview] = useState<string | null>(icon || null);
 
     const form = useForm<z.infer<typeof editQuicklinkSchema>>({
         resolver: zodResolver(editQuicklinkSchema),
@@ -52,8 +57,8 @@ const EditQuicklinkForm: React.FC<{
             await updateQuickLink(url, {
                 title: values.title,
                 url: values.url,
-                icon: icon // Keep the existing icon if not changed
-            }, values.icon?.[0]);
+                // icon: icon // Keep the existing icon if not changed
+            }/* , values.icon?.[0] */);
             toast.success('Quicklink updated successfully');
         } catch (error) {
             console.error(error);
@@ -61,23 +66,29 @@ const EditQuicklinkForm: React.FC<{
         }
     }
 
-    const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setIconPreview(reader.result as string);
-            };
-            reader.readAsDataURL(file);
-        } else {
-            setIconPreview(icon || null);
-        }
-    };
+    // const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const file = e.target.files?.[0];
+    //     if (file) {
+    //         const reader = new FileReader();
+    //         reader.onloadend = () => {
+    //             setIconPreview(reader.result as string);
+    //         };
+    //         reader.readAsDataURL(file);
+    //     } else {
+    //         setIconPreview(icon || null);
+    //     }
+    // };
 
     return (
-        <div className="px-6 pt-2 w-full pb-8 max-w-md mx-auto">
+        <>
+            <DialogHeader>
+                <DialogTitle className='text-light-1 text-2xl font-semibold'>Edit Quicklink</DialogTitle>
+                <DialogDescription className='text-light-3'>
+                    Update your quick link information.
+                </DialogDescription>
+            </DialogHeader>
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:px-4">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-6 pt-2">
                     <FormField
                         control={form.control}
                         name="title"
@@ -85,7 +96,7 @@ const EditQuicklinkForm: React.FC<{
                             <FormItem>
                                 <FormLabel className='text-light-1 text-lg'>Title</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Enter name for quicklink" aria-label="Title" {...field} />
+                                    <Input placeholder="Enter name for quicklink" aria-label="Title" className="bg-dark-2/80 border-dark-3/50 text-light-1 placeholder-light-4/70 focus:border-theme-primary/50 focus:ring-theme-primary/20" {...field} />
                                 </FormControl>
                                 <FormMessage className='font-medium' />
                             </FormItem>
@@ -98,13 +109,13 @@ const EditQuicklinkForm: React.FC<{
                             <FormItem>
                                 <FormLabel className='text-light-1 text-lg'>URL</FormLabel>
                                 <FormControl>
-                                    <Input type='url' placeholder="Enter URL with https://" aria-label="URL" {...field} />
+                                    <Input type='url' placeholder="Enter URL with https://" aria-label="URL" className="bg-dark-2/80 border-dark-3/50 text-light-1 placeholder-light-4/70 focus:border-theme-primary/50 focus:ring-theme-primary/20" {...field} />
                                 </FormControl>
                                 <FormMessage className='font-medium' />
                             </FormItem>
                         )}
                     />
-                    <FormField
+                    {/* <FormField
                         control={form.control}
                         name="icon"
                         render={({ field: { onChange, value, ...field } }) => (
@@ -135,15 +146,13 @@ const EditQuicklinkForm: React.FC<{
                                 <FormMessage className='font-medium' />
                             </FormItem>
                         )}
-                    />
-                    <div className="pt-4">
-                        <Button type='submit' className="w-full bg-dark-1 hover:bg-dark-0 sm:w-auto sm:px-8 sm:mx-auto block">
-                            Update Quicklink
-                        </Button>
-                    </div>
+                    /> */}
+                    <Button type='submit' className="w-full bg-theme-primary/90 hover:bg-theme-primary text-white font-medium transition-all duration-300">
+                        Update Quicklink
+                    </Button>
                 </form>
             </Form>
-        </div>
+        </>
     )
 }
 
