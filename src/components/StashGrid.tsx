@@ -193,7 +193,7 @@ export default function Component() {
 
     return (
         <div className="p-6">
-            <div className="flex flex-col sm:flex-row gap-4 mb-8">
+            <div className="flex flex-col sm:flex-row gap-4 mb-4">
                 <div className="flex-grow flex items-center gap-2">
                     <Input
                         type="text"
@@ -234,8 +234,15 @@ export default function Component() {
                         </Button>
                     )}
                 </div>
+            </div>
 
-                {isAdvancedSearch && (
+            <div
+                className={`overflow-hidden transition-all duration-500 ease-in-out mb-8 ${isAdvancedSearch
+                        ? 'max-h-96 opacity-100 translate-y-0'
+                        : 'max-h-0 opacity-0 -translate-y-4'
+                    }`}
+            >
+                <div className="pt-4">
                     <Accordion
                         type="single"
                         collapsible
@@ -287,7 +294,7 @@ export default function Component() {
                             </AccordionContent>
                         </AccordionItem>
                     </Accordion>
-                )}
+                </div>
             </div>
 
             {
