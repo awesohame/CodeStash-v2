@@ -2,16 +2,23 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { auth, db } from '@/config/firebase';
-import { onAuthStateChanged, User } from "firebase/auth";
+import { onAuthStateChanged, User, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
+import { useRouter } from "next/navigation";
 
 type AuthContextType = {
     user: User | null;
     username?: string;
     setUsername: (username: string) => void;
+    logout: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({ user: null, username: '', setUsername: () => { } });
+const AuthContext = createContext<AuthContextType>({
+    user: null,
+    username: '',
+    setUsername: () => { },
+    logout: async () => { }
+});
 
 export const useAuth = (): AuthContextType => {
     const context = useContext(AuthContext);
@@ -29,6 +36,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const [user, setCurrentUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [username, setUsername] = useState('');
+    const router = useRouter();
+
+    const logout = async () => {
+        try {
+            await signOut(auth);
+            setUsername('');
+            router.push('/');
+        } catch (error) {
+            console.error("Error signing out: ", error);
+        }
+    };
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -58,7 +76,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, username, setUsername }}>
+        <AuthContext.Provider value={{ user, username, setUsername, logout }}>
             {!loading && children}
         </AuthContext.Provider>
     );

@@ -1,4 +1,5 @@
 export type QuickLink = {
+    id: string; // unique identifier
     title: string;
     url: string;
     icon?: string; // url

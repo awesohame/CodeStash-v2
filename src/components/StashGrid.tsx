@@ -132,57 +132,59 @@ export default function Component() {
         <div key={stash.id} className="mb-6 w-full relative group">
             <Link href={`/${username}/${stash.id}`} className="block">
                 <Card
-                    className={`bg-dark-3 border ${stash.isPinned ? 'border-yellow-500' : 'border-dark-4'} shadow-lg transition-all duration-300 h-full`}
+                    className={`bg-gradient-to-br from-dark-1/80 to-dark-2/60 backdrop-blur-xl border ${stash.isPinned ? 'border-theme-warning/60 shadow-theme-warning/20' : 'border-dark-3/40'} shadow-xl hover:shadow-2xl transition-all duration-300 h-full hover:scale-[1.02] hover:border-theme-primary/40`}
                 >
-                    <CardHeader>
-                        <CardTitle className="text-xl font-bold text-light-1 flex items-center">
-                            {stash.isPinned && <Pin className="w-4 h-4 mr-2 text-yellow-500" />}
+                    <CardHeader className="pb-3">
+                        <CardTitle className="text-2xl xl:text-3xl font-extrabold text-light-1 flex items-center tracking-tight leading-tight">
+                            {stash.isPinned && <Pin className="w-5 h-5 mr-3 text-theme-warning" />}
                             {stash.title}
                         </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                        <p className="text-sm text-light-3 mb-4 line-clamp-2">{stash.desc}</p>
-                        <div className="flex items-center text-sm text-light-4 mb-4">
-                            <Clock className="w-4 h-4 mr-2" />
-                            {new Date(stash.updatedAt || stash.createdAt).toLocaleDateString()}
+                    <CardContent className="space-y-5">
+                        <p className="text-base text-light-3/90 mb-5 line-clamp-2 leading-relaxed font-medium tracking-wide">{stash.desc}</p>
+                        <div className="flex items-center text-sm text-light-4/80 mb-5">
+                            <Clock className="w-4 h-4 mr-2 text-theme-primary/70" />
+                            <span className="font-medium tracking-wide">{new Date(stash.updatedAt || stash.createdAt).toLocaleDateString()}</span>
                         </div>
                         {stash.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mb-4">
+                            <div className="flex flex-wrap gap-2 mb-5">
                                 {stash.tags.slice(0, 3).map((tag: string, index: number) => (
-                                    <span key={index} className="bg-dark-5 text-light-2 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center">
-                                        <Tag className="w-3 h-3 mr-1" />
+                                    <span key={index} className="bg-dark-2/60 backdrop-blur-sm border border-dark-3/30 text-light-2 text-xs font-semibold px-3 py-2 rounded-full flex items-center hover:bg-theme-primary/20 hover:border-theme-primary/40 transition-all duration-300 tracking-wide">
+                                        <Tag className="w-3 h-3 mr-1.5" />
                                         {tag}
                                     </span>
                                 ))}
                                 {stash.tags.length > 3 && (
-                                    <span className="bg-dark-5 text-light-2 text-xs font-semibold px-2.5 py-1 rounded-full">
+                                    <span className="bg-theme-primary/20 backdrop-blur-sm border border-theme-primary/30 text-light-1 text-xs font-bold px-3 py-2 rounded-full tracking-wide">
                                         +{stash.tags.length - 3}
                                     </span>
                                 )}
                             </div>
                         )}
-                        <div className="flex justify-between text-sm text-light-3">
+                        <div className="flex justify-between text-sm text-light-3 bg-dark-2/30 backdrop-blur-sm rounded-lg p-4 border border-dark-3/20">
                             <div className="flex items-center">
-                                <Code className="w-4 h-4 mr-2" />
-                                {stash.stashSections.filter((section: any) => section.type === 'code').length} code snippets
+                                <Code className="w-4 h-4 mr-2 text-theme-success/80" />
+                                <span className="font-bold text-base text-light-2">{stash.stashSections.filter((section: any) => section.type === 'code').length}</span>
+                                <span className="ml-2 font-medium tracking-wide">code snippets</span>
                             </div>
                             <div className="flex items-center">
-                                <FileText className="w-4 h-4 mr-2" />
-                                {stash.stashSections.filter((section: any) => section.type === 'text').length} notes
+                                <FileText className="w-4 h-4 mr-2 text-theme-secondary/80" />
+                                <span className="font-bold text-base text-light-2">{stash.stashSections.filter((section: any) => section.type === 'text').length}</span>
+                                <span className="ml-2 font-medium tracking-wide">notes</span>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
             </Link>
-            <div className="absolute top-2 right-2 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="absolute top-3 right-3 flex space-x-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-[-4px] group-hover:translate-y-0">
                 <Button
-                    className={`${stash.isPinned ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-dark-5 hover:bg-dark-4'} text-light-1 p-2 rounded-md shadow-lg`}
+                    className={`${stash.isPinned ? 'bg-theme-warning/90 hover:bg-theme-warning shadow-theme-warning/30' : 'bg-dark-2/80 hover:bg-dark-3 border border-dark-3/50'} text-white p-2 rounded-lg shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110`}
                     onClick={(e) => handleTogglePinStash(e, stash.id as string)}
                 >
                     <Pin className="w-4 h-4" />
                 </Button>
                 <Button
-                    className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-md shadow-lg"
+                    className="bg-theme-error/90 hover:bg-theme-error text-white p-2 rounded-lg shadow-lg backdrop-blur-sm shadow-theme-error/30 transition-all duration-300 hover:scale-110"
                     onClick={(e) => handleDeleteStash(e, stash.id as string)}
                 >
                     <Trash2 className="w-4 h-4" />
@@ -192,50 +194,69 @@ export default function Component() {
     )
 
     return (
-        <div className="p-6">
-            <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                <div className="flex-grow flex items-center gap-2">
+        <div className="p-6 min-h-screen">
+            <div className="mb-8">
+                <h2 className="text-3xl xl:text-4xl font-black text-light-1 mb-2 tracking-tight">Your Code Stashes</h2>
+                <p className="text-lg text-light-3/80 font-medium tracking-wide">Organize, search, and manage your code snippets</p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                <div className="flex-grow flex items-center gap-3">
                     <Input
                         type="text"
-                        placeholder="Search stashes..."
+                        placeholder="Search your stashes..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="flex-grow bg-dark-2 border-dark-4 text-light-1 placeholder-light-4"
+                        className="flex-grow bg-dark-1/80 backdrop-blur-sm border-dark-3/50 text-light-1 placeholder-light-4/70 focus:border-theme-primary/50 focus:ring-theme-primary/20 transition-all duration-300 text-base font-medium"
                     />
                     <Button
                         onClick={handleSearch}
                         disabled={isSearching}
-                        className="bg-dark-4 hover:bg-dark-5 text-light-1"
+                        className="bg-theme-primary/90 hover:bg-theme-primary text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 backdrop-blur-sm font-semibold text-base px-6"
                     >
-                        {isSearching ? 'Searching...' : <Search className="w-4 h-4" />}
+                        {isSearching ? (
+                            <span className="flex items-center gap-2">
+                                <RefreshCw className="w-4 h-4 animate-spin" />
+                                Searching...
+                            </span>
+                        ) : (
+                            <Search className="w-5 h-5" />
+                        )}
                     </Button>
                 </div>
                 <div className="flex items-center justify-between sm:justify-end gap-4">
-                    <div className="flex items-center space-x-2">
-                        <span className="text-light-2 text-sm">Advanced</span>
+                    <div className="flex items-center space-x-4 bg-dark-1/50 backdrop-blur-sm rounded-full px-5 py-3 border border-dark-3/30">
+                        <span className="text-light-2 text-base font-semibold tracking-wide">Advanced</span>
                         <Switch
                             checked={isAdvancedSearch}
                             onCheckedChange={setIsAdvancedSearch}
-                            className="data-[state=checked]:bg-dark-5 data-[state=unchecked]:bg-dark-3"
+                            className="data-[state=checked]:bg-theme-primary data-[state=unchecked]:bg-dark-3"
                         >
                             <span className="sr-only">Advanced search</span>
                             <span
                                 className={`${isAdvancedSearch ? 'translate-x-5' : 'translate-x-0'
-                                    } inline-block h-4 w-4 transform rounded-full bg-light-1 transition`}
+                                    } inline-block h-4 w-4 transform rounded-full bg-white shadow-md transition-transform duration-300`}
                             />
                         </Switch>
                     </div>
                     {searchResults.length > 0 && (
                         <Button
                             onClick={handleViewAllStashes}
-                            className="bg-dark-4 hover:bg-dark-5 text-light-1"
+                            className="bg-dark-2/80 hover:bg-dark-3 text-light-1 border border-dark-3/50 backdrop-blur-sm transition-all duration-300 font-semibold"
                         >
-                            View All
+                            View All Stashes
                         </Button>
                     )}
                 </div>
+            </div>
 
-                {isAdvancedSearch && (
+            <div
+                className={`overflow-hidden transition-all duration-500 ease-in-out mb-10 ${isAdvancedSearch
+                    ? 'max-h-96 opacity-100 translate-y-0'
+                    : 'max-h-0 opacity-0 -translate-y-4'
+                    }`}
+            >
+                <div className="pt-4">
                     <Accordion
                         type="single"
                         collapsible
@@ -243,40 +264,40 @@ export default function Component() {
                         className="w-full"
                     >
                         <AccordionItem value="advanced-options" className="border-none">
-                            <AccordionTrigger className="text-light-2 hover:no-underline">
+                            <AccordionTrigger className="text-light-1 hover:no-underline hover:text-theme-primary transition-colors duration-300 font-bold text-xl tracking-wide">
                                 Advanced Search Options
                             </AccordionTrigger>
                             <AccordionContent>
-                                <div className="bg-dark-3 bg-opacity-50 p-6 rounded-xl border border-dark-4 shadow-lg backdrop-blur-sm">
-                                    <div className="space-y-5">
-                                        <Label className="text-light-1 text-lg font-semibold mb-3 block">Search In</Label>
+                                <div className="bg-dark-1/60 backdrop-blur-xl p-8 rounded-2xl border border-dark-3/40 shadow-2xl">
+                                    <div className="space-y-6">
+                                        <Label className="text-light-1 text-xl font-bold mb-4 block tracking-wide">Search Location</Label>
                                         <RadioGroup
                                             defaultValue="desc"
                                             onValueChange={(value: 'desc' | 'sections') => setSearchIndex(value)}
-                                            className="space-y-3"
+                                            className="space-y-4"
                                         >
-                                            <div className="flex items-center space-x-3 transition-all duration-200 hover:bg-dark-4 hover:bg-opacity-30 p-2 rounded-lg cursor-pointer group">
+                                            <div className="flex items-center space-x-4 transition-all duration-200 hover:bg-dark-2/50 hover:backdrop-blur-sm p-4 rounded-xl cursor-pointer group border border-transparent hover:border-dark-3/30">
                                                 <RadioGroupItem
                                                     value="desc"
                                                     id="desc"
-                                                    className="border-light-3 text-light-1 focus:border-light-1"
+                                                    className="border-dark-3 text-theme-primary focus:border-theme-primary data-[state=checked]:border-theme-primary data-[state=checked]:bg-theme-primary"
                                                 />
                                                 <Label
                                                     htmlFor="desc"
-                                                    className="text-light-2 group-hover:text-light-1 transition-colors duration-200 cursor-pointer"
+                                                    className="text-light-2 group-hover:text-light-1 transition-colors duration-200 cursor-pointer font-semibold text-lg tracking-wide"
                                                 >
                                                     Description
                                                 </Label>
                                             </div>
-                                            <div className="flex items-center space-x-3 transition-all duration-200 hover:bg-dark-4 hover:bg-opacity-30 p-2 rounded-lg cursor-pointer group">
+                                            <div className="flex items-center space-x-4 transition-all duration-200 hover:bg-dark-2/50 hover:backdrop-blur-sm p-4 rounded-xl cursor-pointer group border border-transparent hover:border-dark-3/30">
                                                 <RadioGroupItem
                                                     value="sections"
                                                     id="sections"
-                                                    className="border-light-3 text-light-1 focus:border-light-1"
+                                                    className="border-dark-3 text-theme-primary focus:border-theme-primary data-[state=checked]:border-theme-primary data-[state=checked]:bg-theme-primary"
                                                 />
                                                 <Label
                                                     htmlFor="sections"
-                                                    className="text-light-2 group-hover:text-light-1 transition-colors duration-200 cursor-pointer"
+                                                    className="text-light-2 group-hover:text-light-1 transition-colors duration-200 cursor-pointer font-semibold text-lg tracking-wide"
                                                 >
                                                     Stash Contents
                                                 </Label>
@@ -287,25 +308,28 @@ export default function Component() {
                             </AccordionContent>
                         </AccordionItem>
                     </Accordion>
-                )}
+                </div>
             </div>
 
             {
                 searchResults.length > 0 ? (
                     <div>
-                        <h2 className="text-2xl font-bold text-light-1 mb-4">Search Results</h2>
+                        <h2 className="text-3xl font-bold text-light-1 mb-6">Search Results</h2>
                         <Masonry
                             breakpointCols={breakpointColumnsObj}
                             className="flex w-auto -ml-6"
                             columnClassName="pl-6 bg-clip-padding"
                         >
                             <div
-                                className="bg-dark-3 border border-dark-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer mb-6 w-full h-[200px]"
+                                className="bg-gradient-to-br from-dark-1/60 to-dark-2/40 backdrop-blur-xl border border-dark-3/40 rounded-2xl shadow-xl hover:shadow-2xl hover:border-theme-primary/40 transition-all duration-300 cursor-pointer mb-6 w-full h-[200px] group hover:scale-[1.02]"
                                 onClick={handleCreateNewStash}
                             >
                                 <div className="flex flex-col items-center justify-center h-full p-8">
-                                    <PlusCircle className="w-16 h-16 text-light-3 mb-4" />
-                                    <p className="text-light-2 text-lg font-semibold">Create New Stash</p>
+                                    <div className="w-20 h-20 bg-theme-primary/20 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-theme-primary/30 transition-all duration-300 group-hover:scale-110">
+                                        <PlusCircle className="w-10 h-10 text-theme-primary" />
+                                    </div>
+                                    <p className="text-light-1 text-xl font-bold tracking-tight">Create New Stash</p>
+                                    <p className="text-light-3/80 text-base mt-2 font-medium tracking-wide">Start organizing your code snippets</p>
                                 </div>
                             </div>
                             {searchResults.map(renderStashCard)}
@@ -314,15 +338,25 @@ export default function Component() {
                 ) : (
                     <>
                         {pinnedStashes.length > 0 && (
-                            <div>
-                                <div className="flex justify-between items-center mb-4">
-                                    <h2 className="text-2xl font-bold text-light-1">Pinned Stashes</h2>
+                            <div className="mb-16">
+                                <div className="flex justify-between items-center mb-8">
+                                    <div className='flex items-center gap-8'>
+                                        <h2 className="text-4xl font-black text-light-1 tracking-tight">Pinned Stashes</h2>
+                                        <p className="text-light-3/80 text-lg font-medium mt-2 tracking-wide">Your most important code collections</p>
+                                    </div>
                                     <Button
                                         onClick={handleRefresh}
                                         disabled={isRefreshing}
-                                        className="bg-dark-4 hover:bg-dark-5 text-light-1"
+                                        className="bg-dark-2/80 hover:bg-dark-3 text-light-1 border border-dark-3/50 backdrop-blur-sm transition-all duration-300 hover:border-theme-primary/40 font-semibold px-6"
                                     >
-                                        {isRefreshing ? 'Refreshing...' : <RefreshCw className="w-4 h-4" />}
+                                        {isRefreshing ? (
+                                            <div className="flex items-center gap-2">
+                                                <RefreshCw className="w-4 h-4 animate-spin" />
+                                                Refreshing...
+                                            </div>
+                                        ) : (
+                                            <RefreshCw className="w-5 h-5" />
+                                        )}
                                     </Button>
                                 </div>
                                 <Masonry
@@ -336,15 +370,25 @@ export default function Component() {
                         )}
 
                         <div>
-                            <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-2xl font-bold text-light-1">All Stashes</h2>
+                            <div className="flex justify-between items-center mb-8">
+                                <div className='flex items-center gap-8'>
+                                    <h2 className="text-4xl font-black text-light-1 tracking-tight">All Stashes</h2>
+                                    <p className="text-light-3/80 text-lg font-medium mt-2 tracking-wide">Your complete code collection</p>
+                                </div>
                                 {!pinnedStashes.length && (
                                     <Button
                                         onClick={handleRefresh}
                                         disabled={isRefreshing}
-                                        className="bg-dark-4 hover:bg-dark-5 text-light-1"
+                                        className="bg-dark-2/80 hover:bg-dark-3 text-light-1 border border-dark-3/50 backdrop-blur-sm transition-all duration-300 hover:border-theme-primary/40 font-semibold px-6"
                                     >
-                                        {isRefreshing ? 'Refreshing...' : <RefreshCw className="w-4 h-4" />}
+                                        {isRefreshing ? (
+                                            <div className="flex items-center gap-2">
+                                                <RefreshCw className="w-4 h-4 animate-spin" />
+                                                Refreshing...
+                                            </div>
+                                        ) : (
+                                            <RefreshCw className="w-5 h-5" />
+                                        )}
                                     </Button>
                                 )}
                             </div>
@@ -354,12 +398,15 @@ export default function Component() {
                                 columnClassName="pl-6 bg-clip-padding"
                             >
                                 <div
-                                    className="bg-dark-3 border border-dark-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer mb-6 w-full h-[200px]"
+                                    className="bg-gradient-to-br from-dark-1/60 to-dark-2/40 backdrop-blur-xl border border-dark-3/40 rounded-2xl shadow-xl hover:shadow-2xl hover:border-theme-primary/40 transition-all duration-300 cursor-pointer mb-6 w-full h-[200px] group hover:scale-[1.02]"
                                     onClick={handleCreateNewStash}
                                 >
                                     <div className="flex flex-col items-center justify-center h-full p-8">
-                                        <PlusCircle className="w-16 h-16 text-light-3 mb-4" />
-                                        <p className="text-light-2 text-lg font-semibold">Create New Stash</p>
+                                        <div className="w-20 h-20 bg-theme-primary/20 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-theme-primary/30 transition-all duration-300 group-hover:scale-110">
+                                            <PlusCircle className="w-10 h-10 text-theme-primary" />
+                                        </div>
+                                        <p className="text-light-1 text-xl font-bold tracking-tight">Create New Stash</p>
+                                        <p className="text-light-3/80 text-base mt-2 font-medium tracking-wide">Start organizing your code snippets</p>
                                     </div>
                                 </div>
                                 {normalStashes.map(renderStashCard)}
