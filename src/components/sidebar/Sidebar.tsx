@@ -5,6 +5,7 @@ import { FaPlus } from "react-icons/fa6";
 import { Button } from '../ui/button';
 import { FiMoreVertical } from "react-icons/fi";
 import { RefreshCw, GripVertical, Check, X } from 'lucide-react';
+import toast from 'react-hot-toast';
 import {
     Tooltip,
     TooltipContent,
@@ -43,7 +44,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ onCloseSidebar }) => {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
     const { quickLinks, refreshQuickLinks, updateQuickLinks } = useSidebar();
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [isReorderMode, setIsReorderMode] = useState(false);
@@ -87,6 +88,16 @@ const Sidebar: React.FC<SidebarProps> = ({ onCloseSidebar }) => {
         setIsReorderMode(false);
     };
 
+    const handleLogout = async () => {
+        try {
+            await logout();
+            toast.success('Successfully logged out');
+        } catch (error) {
+            console.error('Logout error:', error);
+            toast.error('Failed to logout. Please try again.');
+        }
+    };
+
     return (
         <div className='w-full h-screen flex flex-col bg-gradient-to-br from-dark-0/95 via-dark-1/90 to-dark-2/85 backdrop-blur-xl border-r border-dark-3/30'>
             <div className='w-full bg-gradient-to-r from-dark-1/80 to-dark-2/60 backdrop-blur-xl flex items-center justify-between px-6 py-5 border-b border-dark-3/30'>
@@ -99,10 +110,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onCloseSidebar }) => {
                 </Button>
             </div>
             <div className='flex flex-col flex-grow overflow-hidden'>
-                <div className='px-6 py-6'>
-                    <div className='text-xl text-light-1 flex justify-between items-center mb-6'>
-                        <span className='font-semibold text-light-1'>Quick Links</span>
-                        <div className='flex items-center'>
+                <div className='px-4 py-4'>
+                    <div className='text-lg text-light-1 flex justify-between items-center mb-6'>
+                        <span className='font-bold text-light-1 text-medium tracking-tight'>Quick Links</span>
+                        <div className='flex items-center gap-1'>
                             {!isReorderMode ? (
                                 <>
                                     <TooltipProvider>
@@ -111,13 +122,13 @@ const Sidebar: React.FC<SidebarProps> = ({ onCloseSidebar }) => {
                                                 <Button
                                                     onClick={handleRefresh}
                                                     disabled={isRefreshing}
-                                                    className='mr-2 rounded-full hover:bg-dark-2/60 hover:backdrop-blur-sm text-light-3 hover:text-theme-primary p-2 h-auto bg-transparent cursor-pointer transition-all duration-300 border border-transparent hover:border-dark-3/40'
+                                                    className='rounded-full hover:bg-dark-2/60 hover:backdrop-blur-sm text-light-3 hover:text-theme-primary p-1.5 h-auto bg-transparent cursor-pointer transition-all duration-300 border border-transparent hover:border-dark-3/40'
                                                 >
-                                                    <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                                                    <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
                                                 </Button>
                                             </TooltipTrigger>
                                             <TooltipContent className='bg-dark-2/90 backdrop-blur-xl text-light-1 border border-dark-3/40 shadow-xl'>
-                                                <span>Refresh Quick Links</span>
+                                                <span className='font-medium'>Refresh</span>
                                             </TooltipContent>
                                         </Tooltip>
                                     </TooltipProvider>
@@ -127,13 +138,13 @@ const Sidebar: React.FC<SidebarProps> = ({ onCloseSidebar }) => {
                                             <TooltipTrigger asChild>
                                                 <Button
                                                     onClick={handleStartReordering}
-                                                    className='mr-2 rounded-full hover:bg-dark-2/60 hover:backdrop-blur-sm text-light-3 hover:text-theme-primary p-2 h-auto bg-transparent cursor-pointer transition-all duration-300 border border-transparent hover:border-dark-3/40'
+                                                    className='rounded-full hover:bg-dark-2/60 hover:backdrop-blur-sm text-light-3 hover:text-theme-primary p-1.5 h-auto bg-transparent cursor-pointer transition-all duration-300 border border-transparent hover:border-dark-3/40'
                                                 >
-                                                    <GripVertical className='w-5 h-5' />
+                                                    <GripVertical className='w-4 h-4' />
                                                 </Button>
                                             </TooltipTrigger>
                                             <TooltipContent className='bg-dark-2/90 backdrop-blur-xl text-light-1 border border-dark-3/40 shadow-xl'>
-                                                <span>Reorder Quick Links</span>
+                                                <span className='font-medium'>Reorder</span>
                                             </TooltipContent>
                                         </Tooltip>
                                     </TooltipProvider>
@@ -143,21 +154,21 @@ const Sidebar: React.FC<SidebarProps> = ({ onCloseSidebar }) => {
                                             <TooltipProvider>
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
-                                                        <div className='rounded-full hover:bg-dark-2/60 hover:backdrop-blur-sm text-light-3 hover:text-theme-primary p-2 h-auto bg-transparent cursor-pointer transition-all duration-300 border border-transparent hover:border-dark-3/40'>
-                                                            <FaPlus className='text-lg' />
+                                                        <div className='rounded-full hover:bg-dark-2/60 hover:backdrop-blur-sm text-light-3 hover:text-theme-primary p-1.5 h-auto bg-transparent cursor-pointer transition-all duration-300 border border-transparent hover:border-dark-3/40'>
+                                                            <FaPlus className='text-sm' />
                                                         </div>
                                                     </TooltipTrigger>
                                                     <TooltipContent className='bg-dark-2/90 backdrop-blur-xl text-light-1 border border-dark-3/40 shadow-xl'>
-                                                        <span>Add a Quick Link</span>
+                                                        <span className='font-medium'>Add Link</span>
                                                     </TooltipContent>
                                                 </Tooltip>
                                             </TooltipProvider>
                                         </DialogTrigger>
                                         <DialogContent className='bg-dark-1/95 backdrop-blur-xl border border-dark-3/40 rounded-2xl shadow-2xl'>
                                             <DialogHeader>
-                                                <DialogTitle className='text-light-1 text-2xl font-semibold'>Create Quicklink</DialogTitle>
-                                                <DialogDescription className='text-light-3'>
-                                                    Add a new quick link to your sidebar for easy access to your favorite websites.
+                                                <DialogTitle className='text-light-1 text-3xl font-bold tracking-tight mb-2'>Create Quick Link</DialogTitle>
+                                                <DialogDescription className='text-light-3/80 text-base font-medium tracking-wide'>
+                                                    Add a new quick link to your sidebar for instant access to your favorite websites.
                                                 </DialogDescription>
                                             </DialogHeader>
                                             <QuickLinkForm />
@@ -184,19 +195,19 @@ const Sidebar: React.FC<SidebarProps> = ({ onCloseSidebar }) => {
                     </div>
                 </div>
 
-                <div className='flex-grow overflow-y-auto px-6'>
+                <div className='flex-grow overflow-y-auto px-4'>
                     <DragDropContext onDragEnd={onDragEnd}>
                         <Droppable droppableId="quicklinks">
                             {(provided) => (
                                 <div
                                     {...provided.droppableProps}
                                     ref={provided.innerRef}
-                                    className='flex flex-col gap-2'
+                                    className='flex flex-col gap-1.5'
                                 >
                                     {(isReorderMode ? reorderLinks : quickLinks).map((quicklink, index) => (
                                         <Draggable
-                                            key={`${quicklink.title}-${index}`}
-                                            draggableId={`${quicklink.title}-${index}`}
+                                            key={quicklink.id}
+                                            draggableId={quicklink.id}
                                             index={index}
                                             isDragDisabled={!isReorderMode}
                                         >
@@ -211,13 +222,14 @@ const Sidebar: React.FC<SidebarProps> = ({ onCloseSidebar }) => {
                                                         hover:bg-dark-2/60 hover:border-theme-primary/40
                                                         transition-all 
                                                         duration-300
+                                                        overflow-hidden
                                                         ${snapshot.isDragging ? 'shadow-2xl shadow-theme-primary/20 scale-105' : 'hover:scale-[1.02]'}
                                                     `}
                                                 >
                                                     <Link
                                                         href={quicklink.url}
                                                         target="_blank" rel="noopener noreferrer"
-                                                        className='grow py-3 px-4 flex gap-3 text-light-3 hover:text-light-1 transition-colors duration-300'
+                                                        className='flex-1 py-2.5 px-3 flex gap-2 text-light-3 hover:text-light-1 transition-colors duration-300 min-w-0 overflow-hidden'
                                                     >
                                                         {/* {quicklink.icon ? (
                                                             <Image
@@ -230,20 +242,21 @@ const Sidebar: React.FC<SidebarProps> = ({ onCloseSidebar }) => {
                                                         ) : ( */}
                                                         {/* <SidebarIcon link={quicklink.url} className='w-5 h-5 text-theme-primary/80' /> */}
                                                         {/* )} */}
-                                                        <span className='text-sm font-medium'>
+                                                        <span className='text-small font-medium truncate block'>
                                                             {quicklink.title}
                                                         </span>
                                                     </Link>
                                                     {!isReorderMode && (
-                                                        <div className='flex justify-end pr-3'>
+                                                        <div className='flex justify-end pr-2'>
                                                             <Popover>
                                                                 <PopoverTrigger>
-                                                                    <div className='rounded-full p-2 text-light-4 hover:text-light-1 hover:bg-dark-3/60 transition-all duration-300'>
-                                                                        <FiMoreVertical className='text-lg' />
+                                                                    <div className='rounded-full p-1.5 text-light-4 hover:text-light-1 hover:bg-dark-3/60 transition-all duration-300'>
+                                                                        <FiMoreVertical className='text-sm' />
                                                                     </div>
                                                                 </PopoverTrigger>
                                                                 <PopoverContent className='bg-dark-1/95 backdrop-blur-xl border border-dark-3/40 transform -translate-y-1 -translate-x-18 rounded-xl w-auto p-2 shadow-2xl'>
                                                                     <QuickLinkActions
+                                                                        id={quicklink.id}
                                                                         title={quicklink.title}
                                                                         url={quicklink.url}
                                                                         icon={quicklink.icon}
@@ -255,9 +268,9 @@ const Sidebar: React.FC<SidebarProps> = ({ onCloseSidebar }) => {
                                                     {isReorderMode && (
                                                         <div
                                                             {...provided.dragHandleProps}
-                                                            className='p-3 cursor-move flex justify-end'
+                                                            className='p-2 cursor-move flex justify-end'
                                                         >
-                                                            <GripVertical className='text-light-4 hover:text-theme-primary w-5 h-5 transition-colors duration-300' />
+                                                            <GripVertical className='text-light-4 hover:text-theme-primary w-4 h-4 transition-colors duration-300' />
                                                         </div>
                                                     )}
                                                 </div>
@@ -286,7 +299,9 @@ const Sidebar: React.FC<SidebarProps> = ({ onCloseSidebar }) => {
                             <Button className='text-dark-0 bg-theme-primary hover:bg-theme-primary/80 transition-all duration-300 font-medium'>
                                 <Link href='/settings' className='h-full w-full flex justify-center items-center'>Settings</Link>
                             </Button>
-                            <Button className='text-white bg-theme-error hover:bg-theme-error/80 transition-all duration-300 font-medium'>Logout</Button>
+                            <Button className='text-white bg-theme-error hover:bg-theme-error/80 transition-all duration-300 font-medium'
+                                onClick={handleLogout}
+                            >Logout</Button>
                         </div>
                     </PopoverContent>
                 </Popover>

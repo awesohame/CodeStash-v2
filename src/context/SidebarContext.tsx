@@ -10,8 +10,8 @@ type SidebarContextType = {
     quickLinks: QuickLink[];
     setQuickLinks: (quickLinks: QuickLink[]) => void;
     addQuickLink: (newQuickLink: QuickLink, iconFile?: File) => Promise<void>;
-    removeQuickLink: (url: string) => Promise<void>;
-    updateQuickLink: (oldUrl: string, updatedQuickLink: QuickLink, iconFile?: File) => Promise<void>;
+    removeQuickLink: (id: string) => Promise<void>;
+    updateQuickLink: (id: string, updatedQuickLink: QuickLink, iconFile?: File) => Promise<void>;
     refreshQuickLinks: () => Promise<void>;
     updateQuickLinks: (newQuickLinks: QuickLink[]) => Promise<void>; // New method
 };
@@ -43,7 +43,26 @@ export const SidebarProvider = ({ children }: SidebarProviderProps) => {
         const quickLinkRef = doc(db, 'quickLinks', email as string);
         const quickLinkDoc = await getDoc(quickLinkRef);
         if (quickLinkDoc.exists()) {
-            const quickLinksData = quickLinkDoc.data().quickLinks ?? [];
+            let quickLinksData = quickLinkDoc.data().quickLinks ?? [];
+
+            // Migration: Add IDs to existing quicklinks that don't have them
+            let needsUpdate = false;
+            quickLinksData = quickLinksData.map((link: QuickLink) => {
+                if (!link.id) {
+                    needsUpdate = true;
+                    return {
+                        ...link,
+                        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+                    };
+                }
+                return link;
+            });
+
+            // If we added IDs, update Firestore
+            if (needsUpdate) {
+                await setDoc(quickLinkRef, { quickLinks: quickLinksData }, { merge: true });
+            }
+
             setQuickLinks(quickLinksData);
             console.log('quicklinks fetched');
         } else {
@@ -81,6 +100,11 @@ export const SidebarProvider = ({ children }: SidebarProviderProps) => {
     };
 
     const addQuickLink = async (newQuickLink: QuickLink, iconFile?: File) => {
+        // Generate unique ID if not provided
+        if (!newQuickLink.id) {
+            newQuickLink.id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        }
+
         if (iconFile) {
             const iconUrl = await uploadIcon(iconFile);
             newQuickLink.icon = iconUrl;
@@ -90,19 +114,19 @@ export const SidebarProvider = ({ children }: SidebarProviderProps) => {
         await updateFirestore(updatedQuickLinks);
     };
 
-    const removeQuickLink = async (url: string) => {
-        const updatedQuickLinks = quickLinks.filter(link => link.url !== url);
+    const removeQuickLink = async (id: string) => {
+        const updatedQuickLinks = quickLinks.filter(link => link.id !== id);
         setQuickLinks(updatedQuickLinks);
         await updateFirestore(updatedQuickLinks);
     };
 
-    const updateQuickLink = async (oldUrl: string, updatedQuickLink: QuickLink, iconFile?: File) => {
+    const updateQuickLink = async (id: string, updatedQuickLink: QuickLink, iconFile?: File) => {
         if (iconFile) {
             const iconUrl = await uploadIcon(iconFile);
             updatedQuickLink.icon = iconUrl;
         }
         const updatedQuickLinks = quickLinks.map(link =>
-            link.url === oldUrl ? updatedQuickLink : link
+            link.id === id ? updatedQuickLink : link
         );
         setQuickLinks(updatedQuickLinks);
         await updateFirestore(updatedQuickLinks);

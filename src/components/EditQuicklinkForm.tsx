@@ -37,10 +37,11 @@ const editQuicklinkSchema = z.object({
 });
 
 const EditQuicklinkForm: React.FC<{
+    id: string,
     title: string,
     url: string,
     icon?: string
-}> = ({ title, url, icon }) => {
+}> = ({ id, title, url, icon }) => {
     const { updateQuickLink } = useSidebar();
     // const [iconPreview, setIconPreview] = useState<string | null>(icon || null);
 
@@ -54,7 +55,8 @@ const EditQuicklinkForm: React.FC<{
 
     async function onSubmit(values: z.infer<typeof editQuicklinkSchema>) {
         try {
-            await updateQuickLink(url, {
+            await updateQuickLink(id, {
+                id,
                 title: values.title,
                 url: values.url,
                 // icon: icon // Keep the existing icon if not changed
@@ -82,23 +84,28 @@ const EditQuicklinkForm: React.FC<{
     return (
         <>
             <DialogHeader>
-                <DialogTitle className='text-light-1 text-2xl font-semibold'>Edit Quicklink</DialogTitle>
-                <DialogDescription className='text-light-3'>
-                    Update your quick link information.
+                <DialogTitle className='text-light-1 text-3xl font-bold tracking-tight mb-2'>Edit Quick Link</DialogTitle>
+                <DialogDescription className='text-light-3/80 text-base font-medium tracking-wide'>
+                    Update your quick link information and settings.
                 </DialogDescription>
             </DialogHeader>
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-6 pt-2">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 px-6 pt-4">
                     <FormField
                         control={form.control}
                         name="title"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel className='text-light-1 text-lg'>Title</FormLabel>
+                                <FormLabel className='text-light-1 text-xl font-semibold tracking-wide'>Title</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Enter name for quicklink" aria-label="Title" className="bg-dark-2/80 border-dark-3/50 text-light-1 placeholder-light-4/70 focus:border-theme-primary/50 focus:ring-theme-primary/20" {...field} />
+                                    <Input
+                                        placeholder="Enter a memorable name for your quick link"
+                                        aria-label="Title"
+                                        className="bg-dark-2/80 border-dark-3/50 text-light-1 placeholder-light-4/70 focus:border-theme-primary/50 focus:ring-theme-primary/20 text-base font-medium py-3 px-4"
+                                        {...field}
+                                    />
                                 </FormControl>
-                                <FormMessage className='font-medium' />
+                                <FormMessage className='font-medium text-theme-error' />
                             </FormItem>
                         )}
                     />
@@ -107,11 +114,17 @@ const EditQuicklinkForm: React.FC<{
                         name='url'
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel className='text-light-1 text-lg'>URL</FormLabel>
+                                <FormLabel className='text-light-1 text-xl font-semibold tracking-wide'>Website URL</FormLabel>
                                 <FormControl>
-                                    <Input type='url' placeholder="Enter URL with https://" aria-label="URL" className="bg-dark-2/80 border-dark-3/50 text-light-1 placeholder-light-4/70 focus:border-theme-primary/50 focus:ring-theme-primary/20" {...field} />
+                                    <Input
+                                        type='url'
+                                        placeholder="https://example.com"
+                                        aria-label="URL"
+                                        className="bg-dark-2/80 border-dark-3/50 text-light-1 placeholder-light-4/70 focus:border-theme-primary/50 focus:ring-theme-primary/20 text-base font-medium py-3 px-4"
+                                        {...field}
+                                    />
                                 </FormControl>
-                                <FormMessage className='font-medium' />
+                                <FormMessage className='font-medium text-theme-error' />
                             </FormItem>
                         )}
                     />
@@ -147,8 +160,8 @@ const EditQuicklinkForm: React.FC<{
                             </FormItem>
                         )}
                     /> */}
-                    <Button type='submit' className="w-full bg-theme-primary/90 hover:bg-theme-primary text-white font-medium transition-all duration-300">
-                        Update Quicklink
+                    <Button type='submit' className="w-full bg-theme-primary/90 hover:bg-theme-primary text-white font-bold text-lg py-4 transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl tracking-wide">
+                        Update Quick Link
                     </Button>
                 </form>
             </Form>

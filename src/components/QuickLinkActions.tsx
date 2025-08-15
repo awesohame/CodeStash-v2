@@ -11,10 +11,12 @@ import { useSidebar } from '@/context/SidebarContext'
 import toast from 'react-hot-toast'
 
 const QuickLinkActions = ({
+    id,
     title,
     url,
     icon
 }: {
+    id: string,
     title: string,
     url: string,
     icon?: string
@@ -23,7 +25,7 @@ const QuickLinkActions = ({
 
     const handleDelete = async () => {
         try {
-            await removeQuickLink(url)
+            await removeQuickLink(id)
             toast.success('Quicklink deleted successfully')
         } catch (error) {
             console.error(error)
@@ -40,7 +42,12 @@ const QuickLinkActions = ({
                     </Button>
                 </DialogTrigger>
                 <DialogContent className='bg-dark-1/95 backdrop-blur-xl border border-dark-3/40 rounded-2xl shadow-2xl'>
-                    <EditQuicklinkForm title={title} url={url} icon={icon} />
+                    <EditQuicklinkForm
+                        id={id}
+                        title={title}
+                        url={url}
+                        icon={icon}
+                    />
                 </DialogContent>
             </Dialog>
             <Button

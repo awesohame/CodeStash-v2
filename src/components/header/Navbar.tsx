@@ -10,17 +10,17 @@ const Navbar = () => {
     const pathname = usePathname();
 
     return (
-        <nav className='flex gap-8'>
+        <nav className='flex gap-10'>
             {navLinks.map((link, idx) => {
                 return (
                     <Link
                         href={link.path}
                         key={idx}
                         className={cn(
-                            "font-medium hover:text-light-3 text-xl",
+                            "font-bold text-lg tracking-wide hover:text-theme-primary transition-all duration-300",
                             {
-                                "text-light-1": link.path !== pathname,
-                                "text-light-3": link.path === pathname
+                                "text-light-1 hover:scale-105": link.path !== pathname,
+                                "text-theme-primary scale-105": link.path === pathname
                             }
                         )}
                     >

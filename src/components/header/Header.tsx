@@ -5,10 +5,10 @@ import Link from 'next/link'
 
 const Header = () => {
     return (
-        <header className="xl:px-3 py-3 xl:py-6 text-light-1">
+        <header className="xl:px-3 py-4 xl:py-8 text-light-1">
             <div className="flex justify-between items-center mx-3">
                 <Link href="/">
-                    <h1 className="text-3xl text-primary-1 font-bold">
+                    <h1 className="text-4xl xl:text-5xl text-theme-primary font-black tracking-tight hover:text-theme-secondary transition-colors duration-300">
                         CodeStash
                     </h1>
                 </Link>
